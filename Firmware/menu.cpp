@@ -100,7 +100,7 @@ static void menu_back_no_reset(void)
 {
 	if (menu_depth > 0)
 	{
-		menu_depth--;		
+		menu_depth--;
 		menu_goto(menu_stack[menu_depth].menu, menu_stack[menu_depth].position, true, false);
 	}
 }
@@ -174,7 +174,14 @@ static int menu_draw_item_puts_P(char type_char, const char* str)
     int cnt = lcd_printf_P(PSTR("%c%-18.18S%c"), (lcd_encoder == menu_item)?'>':' ', str, type_char);
 	return cnt;
 }
-
+/*#FLB*/
+static int menu_draw_item_puts_P_FL(char type_char, char str[18])
+{
+    lcd_set_cursor(0, menu_row);
+    int cnt = lcd_printf_P(PSTR("%c%-18.18s%c"), (lcd_encoder == menu_item)?'>':' ', str, type_char);
+  return cnt;
+}
+/*#FLB*/
 /*
 int menu_draw_item_puts_P_int16(char type_char, const char* str, int16_t val, )
 {
@@ -200,7 +207,19 @@ uint8_t menu_item_text_P(const char* str)
 	menu_item++;
 	return 0;
 }
-
+/*#FLB*/
+uint8_t menu_item_text_P_FL(char str[18])
+{
+  if (menu_item == menu_line)
+  {
+    if (lcd_draw_update) menu_draw_item_puts_P_FL(LCD_STR_UPLEVEL[0], str);
+    if (menu_clicked && (lcd_encoder == menu_item))
+      return menu_item_ret();
+  }
+  menu_item++;
+  return 0;
+}
+/*#FLB*/
 uint8_t menu_item_submenu_P(const char* str, menu_func_t submenu)
 {
 	if (menu_item == menu_line)
@@ -358,7 +377,7 @@ uint8_t menu_item_edit_P(const char* str, T pval, int16_t min_val, int16_t max_v
 	menu_data_edit_t* _md = (menu_data_edit_t*)&(menu_data[0]);
 	if (menu_item == menu_line)
 	{
-		if (lcd_draw_update) 
+		if (lcd_draw_update)
 		{
 			lcd_set_cursor(0, menu_row);
 			menu_draw_P<T>((lcd_encoder == menu_item)?'>':' ', str, *pval);

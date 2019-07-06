@@ -6,6 +6,7 @@
 #include "ultralcd.h"
 #include "ConfigurationStore.h"
 #include "Configuration_prusa.h"
+#include "Fabman.h" //#FLB
 
 #ifdef MESH_BED_LEVELING
 #include "mesh_bed_leveling.h"

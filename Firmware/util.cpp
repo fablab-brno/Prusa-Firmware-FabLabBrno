@@ -8,6 +8,12 @@
 // Allocate the version string in the program memory. Otherwise the string lands either on the stack or in the global RAM.
 const char FW_VERSION_STR[] PROGMEM = FW_VERSION;
 
+/*#FLB*/
+char FM_UserName[18];
+char FM_IP[18];
+char FM_VER[18];
+/*#FLB*/
+
 const char* FW_VERSION_STR_P()
 {
     return FW_VERSION_STR;
