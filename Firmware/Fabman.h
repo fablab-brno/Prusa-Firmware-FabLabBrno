@@ -9,7 +9,7 @@ extern bool stoppedInfo;
 
 void lcd_FM_login();
 void serial_FM_login();
-void serial_FM_logof();
+void serial_FM_logoff();
 void lcd_FM_offline_screen();
 char FM_filename;
 //extern char* longFilename;
@@ -145,8 +145,8 @@ void serial_FM_login() {
   SERIAL_ECHOLN(Fabman_mode);
 }
 
-void serial_FM_logof() {
-  SERIAL_PROTOCOLLN("Serial FM logof");
+void serial_FM_logoff() {
+  SERIAL_PROTOCOLLN("Serial FM logoff");
   Fabman_mode = 1;
   SERIAL_ECHO("Fabman mode = ");
   SERIAL_ECHOLN(Fabman_mode);
