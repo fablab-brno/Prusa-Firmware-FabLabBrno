@@ -63,7 +63,22 @@
 // SERIAL_PORT selects which serial port should be used for communication with the host.
 // This allows the connection of wireless adapters (for instance) to non-default port pins.
 // Serial port 0 is still used by the Arduino bootloader regardless of this setting.
-#define SERIAL_PORT 0
+
+/*#FLB*/
+// Define integer values for later comparison
+#define PRINTER_MK25  1
+#define PRINTER_MK25S 2
+#define PRINTER_MK3   3
+#define PRINTER_MK3S  4
+
+#if (PRINTER_TYPE == PRINTER_MK25) || (PRINTER_TYPE == PRINTER_MK25S)
+  #define SERIAL_PORT 2
+#elif (PRINTER_TYPE == PRINTER_MK3) || (PRINTER_TYPE == PRINTER_MK3S)
+  #define SERIAL_PORT 0
+#else
+  #error "Unknown printer type set!"
+#endif
+/*#FLB*/
 
 // This determines the communication speed of the printer
 #define BAUDRATE 115200

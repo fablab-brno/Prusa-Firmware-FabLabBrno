@@ -76,6 +76,30 @@ ISR(M_USARTx_RX_vect)
 	}
 }
 #ifndef SNMM
+
+/*#FLB*/
+#if (PRINTER_TYPE == PRINTER_MK25) || (PRINTER_TYPE == PRINTER_MK25S)
+ISR(USARTB_RX_vect)
+{
+  // Test for a framing error.
+  if (UCSR2A & (1 << FE2))
+  {
+    // Characters received with the framing errors will be ignored.
+    // Dummy register read (discard)
+    (void)(*(char *)UDR2);
+  }
+  else
+  {
+    // Read the input register.
+    unsigned char c = UDR2;
+    if (selectedSerialPort == 1)
+      store_char(c);
+#ifdef DEBUG_DUMP_TO_2ND_SERIAL
+    M_UDRx = c;
+#endif //DEBUG_DUMP_TO_2ND_SERIAL
+  }
+}
+#elif (PRINTER_TYPE == PRINTER_MK3) || (PRINTER_TYPE == PRINTER_MK3S)
 ISR(USART1_RX_vect)
 {
 	// Test for a framing error.
@@ -96,6 +120,8 @@ ISR(USART1_RX_vect)
 #endif //DEBUG_DUMP_TO_2ND_SERIAL
 	}
 }
+#endif
+/*#FLB*/
 #endif
 #endif
 
@@ -382,4 +408,3 @@ MarlinSerial MSerial;
 #if defined(AT90USB) && defined (BTENABLED)
    HardwareSerial bt;
 #endif
-
