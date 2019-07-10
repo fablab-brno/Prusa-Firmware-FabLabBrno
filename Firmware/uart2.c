@@ -72,14 +72,13 @@ int8_t uart2_rx_str_P(const char* str)
 	return 1;                                  //all characters match - return 1
 }
 
-#if (PRINTER_TYPE == PRINTER_MK25) || (PRINTER_TYPE == PRINTER_MK25S)
-  #define SERIAL_PORT 2
-#elif (PRINTER_TYPE == PRINTER_MK3) || (PRINTER_TYPE == PRINTER_MK3S)
-  #define SERIAL_PORT 0
-#else
-  #error "Unknown printer type set!"
-#endif
 /*#FLB*/
+// Define integer values for later comparison
+#define PRINTER_MK25  1
+#define PRINTER_MK25S 2
+#define PRINTER_MK3   3
+#define PRINTER_MK3S  4
+
 #if (PRINTER_TYPE == PRINTER_MK3) || (PRINTER_TYPE == PRINTER_MK3S)
 ISR(USART2_RX_vect)
 {

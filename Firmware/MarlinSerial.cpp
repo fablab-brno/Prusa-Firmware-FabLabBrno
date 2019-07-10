@@ -78,6 +78,12 @@ ISR(M_USARTx_RX_vect)
 #ifndef SNMM
 
 /*#FLB*/
+// Define integer values for later comparison
+#define PRINTER_MK25  1
+#define PRINTER_MK25S 2
+#define PRINTER_MK3   3
+#define PRINTER_MK3S  4
+
 #if (PRINTER_TYPE == PRINTER_MK25) || (PRINTER_TYPE == PRINTER_MK25S)
 ISR(USARTB_RX_vect)
 {
