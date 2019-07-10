@@ -12,21 +12,17 @@ void serial_FM_login();
 void serial_FM_logoff();
 void lcd_FM_offline_screen();
 char FM_filename;
-//extern char* longFilename;
 
-//void lcd_FM_login_screen()
 #include "cardreader.h"
-//extern char longFilenameOLD[LONG_FILENAME_LENGTH];
-//extern const char name;
 char *starpos = NULL;
 char *username = NULL;
+
 /*
    Fabman mode:
 
    0)Menu mode
    1)Login screen
-   2)Offline screen
-   3)User not alowed
+
 */
 
 void lcd_FM_login_screen() {
@@ -51,7 +47,7 @@ void lcd_FM_login() {
     SERIAL_ECHOLN(Fabman_mode);
     SERIAL_PROTOCOLLN("Stage 2 = Calling lcd_FM_login_screen()");
     lcd_FM_login_screen();
-    //Fabman_mode = 0;
+
   }
 }
 
@@ -62,7 +58,6 @@ void lcd_FM_offline() {
     SERIAL_ECHOLN(Fabman_mode);
     SERIAL_PROTOCOLLN("Stage 2 = Calling lcd_FM_offline_screen()");
     lcd_FM_offline_screen();
-    //Fabman_mode = 0;
   }
 }
 
@@ -91,26 +86,7 @@ void filament_used_in_last_print() {
   SERIAL_ECHO("TFU: ");
   SERIAL_ECHOLN(total_filament_used);
 
-  //SERIAL_ECHOLN(longFilenameOLD);
-  //SERIAL_ECHOLN(card.longFilename);
-  //SERIAL_PROTOCOLLN(name);
-  //SERIAL_PROTOCOLLN(FM_filename);
 }
-
-//void lcd_FM_not_allowed_screen() {
-//  SERIAL_PROTOCOLLN("Stage 3 = reached lcd_not_allowed_screen()");
-//  lcd_update_enable(false);
-//
-//  lcd_set_custom_characters_progress();
-//  lcd_puts_P(PSTR(ESC_2J ESC_H(4, 0) "Your are not" ESC_H(6, 1)"allowed"  ESC_H(1, 2) "to use this machine"));//
-//  while (Fabman_mode) {
-//    delay_keep_alive(100);
-//    proc_commands();
-//  }
-//  lcd_set_custom_characters_degree();
-//  lcd_update_enable(true);
-//  lcd_update(2);
-//}
 
 void lcd_FM_not_allowed() {
   SERIAL_PROTOCOLLN("Stage 1 = reached lcd_FM_not_allowed()");
@@ -118,25 +94,9 @@ void lcd_FM_not_allowed() {
     SERIAL_ECHO("Fabman mode = ");
     SERIAL_ECHOLN(Fabman_mode);
     SERIAL_PROTOCOLLN("Stage 2 = Calling lcd_FM_not_allowed_screen()");
-    //    lcd_FM_not_allowed_screen();
-    //Fabman_mode = 0;
   }
 }
 
-//void lcd_FM_offline_screen() {
-//  SERIAL_PROTOCOLLN("Stage 3 = reached lcd_FM_offline_screen()");
-//  lcd_update_enable(false);
-//
-//  lcd_set_custom_characters_progress();
-//  lcd_puts_P(PSTR(ESC_2J ESC_H(2, 1) "Prusa i3 Fabman" ESC_H(1, 2) "Printer is offline"));
-//  while (Fabman_mode) {
-//    delay_keep_alive(100);
-//    proc_commands();
-//  }
-//  lcd_set_custom_characters_degree();
-//  lcd_update_enable(true);
-//  lcd_update(2);
-//}
 
 void serial_FM_login() {
   SERIAL_PROTOCOLLN("Serial FM login");
