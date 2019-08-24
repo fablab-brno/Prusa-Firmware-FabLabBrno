@@ -16,13 +16,15 @@ char FM_filename;
 #include "cardreader.h"
 char *starpos = NULL;
 char *username = NULL;
+bool fileExist = 0;
 
 /*
    Fabman mode:
 
    0)Menu mode
    1)Login screen
-
+   2)Offline screen
+   3)User not alowed
 */
 
 void lcd_FM_login_screen() {
@@ -69,8 +71,6 @@ void FM_print_username() {
   username = (strchr_pointer + 5);
   SERIAL_ECHO("UNM: ");
   SERIAL_ECHOLN(username);
-  SERIAL_ECHO("UNM_pointer: ");
-  SERIAL_ECHOLN(strchr_pointer + 5);
 }
 
 void filament_used_in_last_print() {
@@ -85,7 +85,32 @@ void filament_used_in_last_print() {
   SERIAL_ECHOLN(card.longFilename);
   SERIAL_ECHO("TFU: ");
   SERIAL_ECHOLN(total_filament_used);
+}
 
+#define MAX_FILE_SIZE 1024
+#define JSON_BUFFER_SIZE 200
+
+void getConfigFromJSON() {
+  card.ls();
+  if (fileExist != 0) {
+    SERIAL_PROTOCOLLN("File found, trying to read it");
+    // Converted name of "config.json" file in root of SD card
+    card.openFile("CONFI~1.JSO", true);
+    // get first character
+    uint8_t c = card.get();
+    // print whole file
+    while (!card.eof()) {
+      // filter newlines to have message in one line
+      if (c != '\n') {
+        SERIAL_ECHO(c);
+      }
+      c = card.get();
+    }
+    // end of message
+    SERIAL_ECHOLN("");
+  } else {
+    SERIAL_PROTOCOLLN("config file doesn't exist, keep going");
+  }
 }
 
 void lcd_FM_not_allowed() {

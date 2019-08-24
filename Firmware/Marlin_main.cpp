@@ -165,6 +165,7 @@ extern void FM_print_username();
 extern char FM_IP[18];
 extern char FM_UserName[18];
 extern char FM_VER[18];
+extern void getConfigFromJSON();
 /*#FLB*/
 
 //Stepper Movement Variables
@@ -6706,6 +6707,9 @@ if((eSoundMode==e_SOUND_MODE_LOUD)||(eSoundMode==e_SOUND_MODE_ONCE) || (eSoundMo
 	break;
 
   /*#FLB*/
+  case 692:
+    getConfigFromJSON();
+    break;
   case 693:
     lcd_FM_not_online_screen();
     break;

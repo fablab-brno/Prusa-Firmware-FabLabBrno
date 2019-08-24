@@ -9,6 +9,10 @@
 
 #define LONGEST_FILENAME (longFilename[0] ? longFilename : filename)
 
+/*#FLB*/
+extern bool fileExist;
+/*#FLB*/
+
 CardReader::CardReader()
 {
 
@@ -108,7 +112,21 @@ void CardReader::lsDive(const char *prepend, SdFile parent, const char * const m
 				if (longFilename[0] == '.') continue;
 				if (!DIR_IS_FILE_OR_SUBDIR(&p) || (p.attributes & DIR_ATT_HIDDEN)) continue;
 				filenameIsDir = DIR_IS_SUBDIR(&p);
-				if (!filenameIsDir && (p.name[8] != 'G' || p.name[9] == '~')) continue;
+      /*#FLB*/
+      if (lsAction == LS_SerialPrint) {
+        //if (strstr(longFilename, "config.json") != NULL) {
+          if (strstr(filename, "CONFIG~1.JSO") != NULL) {
+          fileExist = 1;
+          SERIAL_PROTOCOL("Bool fileExist: ");
+          SERIAL_PROTOCOLLN(fileExist);
+          SERIAL_PROTOCOLLN("config.json file exists.");
+        } else {
+          //SERIAL_PROTOCOLLN("config.json file does not exists.");
+        }
+      }
+      
+      /*#FLB*/
+      if (!filenameIsDir && (p.name[8] != 'G' /*#FLB*/ && p.name[8] != 'J'/*#FLB*/ || p.name[9] == '~')) continue;
 				switch (lsAction) {
 					case LS_Count:
 						nrFiles++;
