@@ -260,6 +260,7 @@ void CardReader::startFileprint()
   {
     sdprinting = true;
 	paused = false;
+     Stopped = false;
 	#ifdef SDCARD_SORT_ALPHA
 		//flush_presort();
 	#endif

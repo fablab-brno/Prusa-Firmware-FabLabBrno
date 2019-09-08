@@ -11,8 +11,7 @@
 extern FILE _lcdout;
 
 #define lcdout (&_lcdout)
-extern int lcd_putchar(char c, FILE *stream);
-
+extern void lcd_putchar(char c, FILE *stream);
 
 extern void lcd_init(void);
 
@@ -66,7 +65,9 @@ extern void lcd_print(double, int = 2);
 
 //! @brief Clear screen
 #define ESC_2J     "\x1b[2J"
+//! @brief Show cursor
 #define ESC_25h    "\x1b[?25h"
+//! @brief Hide cursor
 #define ESC_25l    "\x1b[?25l"
 //! @brief Set cursor to
 //! @param c column
@@ -163,29 +164,6 @@ public:
 private:
     bool m_updateEnabled;
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/**
-* Implementation of the LCD display routines for a Hitachi HD44780 display. These are common LCD character displays.
-* When selecting the Russian language, a slightly different LCD implementation is used to handle UTF8 characters.
-**/
 
 
 ////////////////////////////////////
