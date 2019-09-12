@@ -6936,6 +6936,7 @@ Sigma_Exit:
       if (beepS > 0)
       {
         #if BEEPER > 0
+        if((eSoundMode==e_SOUND_MODE_LOUD) || (eSoundMode==e_SOUND_MODE_ONCE) || (eSoundMode == e_SOUND_MODE_SILENT)) //#FLB
           Sound_MakeCustom(beepP,beepS,false);
         #endif
       }
