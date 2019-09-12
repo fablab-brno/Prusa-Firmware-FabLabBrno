@@ -1,0 +1,5 @@
+{
+    "board": "PrusaResearchRambo:avr:rambo",
+    "port": "COM73",
+    "sketch": "Firmware.ino"
+}

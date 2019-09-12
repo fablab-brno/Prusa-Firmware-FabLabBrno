@@ -163,6 +163,7 @@ extern void lcd_FM_not_allowed_screen();
 extern void lcd_FM_required_training_screen();
 extern void lcd_FM_required_package_screen();
 extern void lcd_FM_not_online_screen();
+extern void lcd_FM_login_screen();
 extern void FM_print_username();
 extern char FM_IP[18];
 extern char FM_UserName[18];
@@ -238,8 +239,10 @@ bool mesh_bed_run_from_menu = false;
 bool prusa_sd_card_upload = false;
 
 unsigned int status_number = 0;
-
+/*#FLB*/
 unsigned long total_filament_used;
+unsigned long time_used_in_last_print;
+/*#FLB*/
 unsigned int heating_status;
 unsigned int heating_status_counter;
 bool loading_flag = false;

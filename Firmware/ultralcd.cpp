@@ -43,7 +43,8 @@
 #include "first_lay_cal.h"
 
 /*#FLB*/
-extern lcd_FM_login_screen();
+extern int Fabman_mode;
+//extern lcd_FM_login_screen();
 extern char FM_IP[18];
 extern char FM_UserName[18];
 extern char FM_VER[18];
@@ -4416,6 +4417,26 @@ uint8_t nlines;
 #endif //FILAMENT_SENSOR
 
 /*#FLB*/
+
+void lcd_FM_login_screen() {
+  SERIAL_PROTOCOLLN("Stage 3 = reached lcd_FM_login_screen()");
+  lcd_update_enable(false);
+  lcd_clear();
+  lcd_set_custom_characters_progress();
+  //lcd_puts_P(PSTR(ESC_2J ESC_H(2, 1) "Prusa i3 Fabman" ESC_H(3, 2) "Swipe to login"));
+
+  //lcd_puts_at_P(0, 0, _i("Connect printer to")); 
+	lcd_puts_at_P(2, 1, _i("Prusa i3 Fabman"));
+	lcd_puts_at_P(3, 2, _i("Swipe to login"));
+  while (Fabman_mode == 1) {
+    delay_keep_alive(100);
+    proc_commands();
+  }
+  lcd_set_custom_characters_degree();
+  lcd_update_enable(true);
+  lcd_update(2);
+}
+
 void lcd_FM_offline_screen() {
   SERIAL_PROTOCOLLN("Stage 3 = reached lcd_FM_offline_screen()");
   lcd_update_enable(true);
@@ -7118,6 +7139,7 @@ void lcd_print_stop()
   /*#FLB*/
   stoppedInfo = 1;
   filament_used_in_last_print();
+  time_used_in_last_print = t;
   /*#FLB*/
 	save_statistics(total_filament_used, t);
 	lcd_return_to_status();

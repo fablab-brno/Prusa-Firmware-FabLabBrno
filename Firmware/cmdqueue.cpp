@@ -591,7 +591,10 @@ void get_command()
         int hours, minutes;
         minutes=(t/60)%60;
         hours=t/60/60;
-        filament_used_in_last_print(); /*#FLB*/
+        /*#FLB*/
+        time_used_in_last_print = t;
+        filament_used_in_last_print();
+        /*#FLB*/
         save_statistics(total_filament_used, t);
         sprintf_P(time, PSTR("%i hours %i minutes"),hours, minutes);
         SERIAL_ECHO_START;
