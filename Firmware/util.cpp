@@ -12,6 +12,7 @@ const char FW_VERSION_STR[] PROGMEM = FW_VERSION;
 char FM_UserName[18];
 char FM_IP[18];
 char FM_VER[18];
+bool selected_FM_FW_TYPE = 0;
 /*#FLB*/
 
 const char* FW_VERSION_STR_P()

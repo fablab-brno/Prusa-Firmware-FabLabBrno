@@ -3557,6 +3557,11 @@ void process_commands()
       SERIAL_ECHO("UNM Version: ");
       SERIAL_ECHOLN(FM_VER);
     }
+    // If the first three chars are "FM_", save it as debug type from "FM_FW_<0/1>"
+    else if ((input_data[0] == 'F') && (input_data[1] == 'M') && (input_data[2] == '_')) {
+      // The 6th char is number 0 or 1, the ASCII value 47 or 48
+      selected_FM_FW_TYPE = input_data[6] - 48;
+    }
     // If not, is is decoded as name
     else {
       lcd_setstatus(strchr_pointer + 5);

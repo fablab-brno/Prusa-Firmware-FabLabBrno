@@ -48,6 +48,7 @@ extern int Fabman_mode;
 extern char FM_IP[18];
 extern char FM_UserName[18];
 extern char FM_VER[18];
+extern bool selected_FM_FW_TYPE;
 extern char *username;
 bool stoppedInfo;
 /*#FLB*/
@@ -2097,6 +2098,11 @@ static void lcd_support_menu()
   menu_item_text_P_FL(FM_IP);
   MENU_ITEM_BACK_P(PSTR("FM version: "));
   menu_item_text_P_FL(FM_VER);
+  // Selector for debug mode in Fabman
+  if (selected_FM_FW_TYPE == 0)
+    MENU_ITEM_FUNCTION_P(_i("FM FW type [stable]"), lcd_FM_FW_type_set);
+  else
+    MENU_ITEM_FUNCTION_P(_i("FM FW type [debug]"), lcd_FM_FW_type_set);
   /*#FLB*/
 
   MENU_ITEM_BACK_P(PSTR("Firmware:"));
@@ -4489,6 +4495,17 @@ void lcd_FM_not_online_screen() {
     delay_keep_alive(100);
   }
   lcd_puts_P(PSTR(ESC_2J ESC_H(2, 1) "Prusa i3 Fabman" ESC_H(3, 2) "Swipe to login"));
+}
+
+void lcd_FM_FW_type_set() {
+  if(selected_FM_FW_TYPE == 1) { 
+    selected_FM_FW_TYPE = 0;
+    SERIAL_PROTOCOLLN("FM FW type [stable]");
+  }
+  else {
+    selected_FM_FW_TYPE = 1;
+    SERIAL_PROTOCOLLN("FM FW type [debug]");
+  }
 }
 
 /*#FLB*/
