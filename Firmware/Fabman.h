@@ -81,8 +81,8 @@ void getConfigFromJSON() {
     uint8_t c = card.get();
     // print whole file
     while (!card.eof()) {
-      // filter newlines to have message in one line
-      if (c != '\n') {
+      // filter newlines/carriage returns/tabulators to have message in one line
+      if ((c != '\n') && (c != '\r') && (c != '\t')) {
         SERIAL_ECHO(c);
       }
       c = card.get();
