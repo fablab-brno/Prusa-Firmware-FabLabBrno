@@ -11,6 +11,7 @@
 
 /*#FLB*/
 extern bool fileExist;
+extern void getConfigFromJSON();
 /*#FLB*/
 
 CardReader::CardReader()
@@ -122,6 +123,7 @@ void CardReader::lsDive(const char *prepend, SdFile parent, const char * const m
           SERIAL_PROTOCOLLN("config.json file exists.");
         } else {
           //SERIAL_PROTOCOLLN("config.json file does not exists.");
+          //SERIAL_PROTOCOLLN(filename);
         }
       }
       
@@ -232,7 +234,12 @@ void CardReader::initsd()
     SERIAL_ECHOLNPGM(MSG_SD_WORKDIR_FAIL);
   }
   */
-  
+
+  /*#FLB*/
+  if (cardOK == true) {
+    getConfigFromJSON();
+  }
+  /*#FLB*/
 }
 
 void CardReader::setroot()

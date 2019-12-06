@@ -76,7 +76,7 @@ void getConfigFromJSON() {
   if (fileExist != 0) {
     SERIAL_PROTOCOLLN("File found, trying to read it");
     // Converted name of "config.json" file in root of SD card
-    card.openFile("CONFI~1.JSO", true);
+    card.openFile("CONFIG~1.JSO", true);
     // get first character
     uint8_t c = card.get();
     // print whole file
