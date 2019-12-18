@@ -62,6 +62,10 @@ void lcd_FM_FW_type_set() {
     SERIAL_PROTOCOLLN("Firmware:1");
   }
 }
+
+void update_FM_FW() {
+	SERIAL_PROTOCOLLN("Update:1");
+}
 /*#FLB*/
 
 int scrollstuff = 0;
@@ -2110,10 +2114,13 @@ static void lcd_support_menu()
   MENU_ITEM_BACK_P(PSTR("FM version: "));
   menu_item_text_P_FL(FM_VER);
   // Selector for debug mode in Fabman
-  if (selected_FM_FW_TYPE == 0)
+  if (selected_FM_FW_TYPE == 0) {
     MENU_ITEM_FUNCTION_P(_i("FM FW type [stable]"), lcd_FM_FW_type_set);
-  else
+	}
+  else {
     MENU_ITEM_FUNCTION_P(_i("FM FW type [debug]"), lcd_FM_FW_type_set);
+	}
+	MENU_ITEM_FUNCTION_P(_i("Update FM FW"), update_FM_FW);
   /*#FLB*/
 
   MENU_ITEM_BACK_P(PSTR("Firmware:"));
