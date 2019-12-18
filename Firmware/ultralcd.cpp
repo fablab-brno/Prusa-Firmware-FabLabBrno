@@ -51,6 +51,17 @@ extern char FM_VER[18];
 extern bool selected_FM_FW_TYPE;
 extern char *username;
 bool stoppedInfo;
+
+void lcd_FM_FW_type_set() {
+  if(selected_FM_FW_TYPE == 1) { 
+    selected_FM_FW_TYPE = 0;
+    SERIAL_PROTOCOLLN("Firmware:0");
+  }
+  else {
+    selected_FM_FW_TYPE = 1;
+    SERIAL_PROTOCOLLN("Firmware:1");
+  }
+}
 /*#FLB*/
 
 int scrollstuff = 0;
@@ -4429,10 +4440,8 @@ void lcd_FM_login_screen() {
   lcd_update_enable(false);
   lcd_clear();
   lcd_set_custom_characters_progress();
-  //lcd_puts_P(PSTR(ESC_2J ESC_H(2, 1) "Prusa i3 Fabman" ESC_H(3, 2) "Swipe to login"));
-
-  //lcd_puts_at_P(0, 0, _i("Connect printer to")); 
-	lcd_puts_at_P(2, 1, _i("Prusa i3 Fabman"));
+  
+  lcd_puts_at_P(2, 1, _i("Prusa i3 Fabman"));
 	lcd_puts_at_P(3, 2, _i("Swipe to login"));
   while (Fabman_mode == 1) {
     delay_keep_alive(100);
@@ -4497,17 +4506,22 @@ void lcd_FM_not_online_screen() {
   lcd_puts_P(PSTR(ESC_2J ESC_H(2, 1) "Prusa i3 Fabman" ESC_H(3, 2) "Swipe to login"));
 }
 
-void lcd_FM_FW_type_set() {
-  if(selected_FM_FW_TYPE == 1) { 
-    selected_FM_FW_TYPE = 0;
-    SERIAL_PROTOCOLLN("FM FW type [stable]");
+void lcd_FM_FM_update_screen() {
+  SERIAL_PROTOCOLLN("Stage 3 = reached lcd_FM_login_screen()");
+  lcd_update_enable(false);
+  lcd_clear();
+  lcd_set_custom_characters_progress();
+  
+  lcd_puts_at_P(2, 1, _i("Prusa i3 Fabman"));
+  lcd_puts_at_P(3, 2, _i("Updating FM fw.."));
+  while (Fabman_mode == 1) {
+    delay_keep_alive(100);
+    proc_commands();
   }
-  else {
-    selected_FM_FW_TYPE = 1;
-    SERIAL_PROTOCOLLN("FM FW type [debug]");
-  }
+  lcd_set_custom_characters_degree();
+  lcd_update_enable(true);
+  lcd_update(2);
 }
-
 /*#FLB*/
 
 //-//

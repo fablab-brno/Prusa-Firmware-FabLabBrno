@@ -163,11 +163,13 @@ extern void lcd_FM_not_allowed_screen();
 extern void lcd_FM_required_training_screen();
 extern void lcd_FM_required_package_screen();
 extern void lcd_FM_not_online_screen();
+extern void lcd_FM_FM_update_screen();
 extern void lcd_FM_login_screen();
 extern void FM_print_username();
 extern char FM_IP[18];
 extern char FM_UserName[18];
 extern char FM_VER[18];
+extern bool selected_FM_FW_TYPE;
 extern void getConfigFromJSON();
 /*#FLB*/
 
@@ -3559,7 +3561,7 @@ void process_commands()
     }
     // If the first three chars are "FM_", save it as debug type from "FM_FW_<0/1>"
     else if ((input_data[0] == 'F') && (input_data[1] == 'M') && (input_data[2] == '_')) {
-      // The 6th char is number 0 or 1, the ASCII value 47 or 48
+      // The 6th char is number 0 or 1, the ASCII value 48 or 49
       selected_FM_FW_TYPE = input_data[6] - 48;
     }
     // If not, is is decoded as name
@@ -7285,6 +7287,9 @@ Sigma_Exit:
 	}
 
   /*#FLB*/
+  case 691:
+    lcd_FM_FM_update_screen();
+    break;
   case 692:
     getConfigFromJSON();
     break;
