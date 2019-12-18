@@ -53,14 +53,17 @@ extern char *username;
 bool stoppedInfo;
 
 void lcd_FM_FW_type_set() {
-  if(selected_FM_FW_TYPE == 1) { 
-    selected_FM_FW_TYPE = 0;
-    SERIAL_PROTOCOLLN("Firmware:0");
-  }
-  else {
-    selected_FM_FW_TYPE = 1;
-    SERIAL_PROTOCOLLN("Firmware:1");
-  }
+	// Lock for one-time change
+  if (lock_FM_FW_TYPE == 0) {
+		// Change actual type to opposite
+		if(selected_FM_FW_TYPE == 1) { 
+			SERIAL_PROTOCOLLN("Firmware:0");
+		}
+		else {
+			SERIAL_PROTOCOLLN("Firmware:1");
+		}
+		lock_FM_FW_TYPE = 1;
+	}
 }
 
 void update_FM_FW() {

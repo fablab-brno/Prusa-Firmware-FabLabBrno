@@ -169,6 +169,7 @@ extern void FM_print_username();
 extern char FM_IP[18];
 extern char FM_UserName[18];
 extern char FM_VER[18];
+extern bool lock_FM_FW_TYPE;
 extern bool selected_FM_FW_TYPE;
 extern void getConfigFromJSON();
 /*#FLB*/
@@ -3563,6 +3564,8 @@ void process_commands()
     else if ((input_data[0] == 'F') && (input_data[1] == 'M') && (input_data[2] == '_')) {
       // The 6th char is number 0 or 1, the ASCII value 48 or 49
       selected_FM_FW_TYPE = input_data[6] - 48;
+      // Unlock FM_FW_TYPE
+      lock_FM_FW_TYPE = 0;
     }
     // If not, is is decoded as name
     else {
