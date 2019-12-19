@@ -71,24 +71,35 @@ void filament_used_in_last_print() {
 #define MAX_FILE_SIZE 1024
 #define JSON_BUFFER_SIZE 200
 
+void extractDataFromJSON(uint8_t c) {
+  // print whole file
+  while (!card.eof()) {
+    // filter newlines/carriage returns/tabulators to have message in one line
+    if ((c != '\n') && (c != '\r') && (c != '\t')) {
+      SERIAL_ECHO(c);
+    }
+    c = card.get();
+  }
+  // end of message
+  SERIAL_ECHOLN("");
+}
+
 void getConfigFromJSON() {
   card.ls();
   if (fileExist != 0) {
     SERIAL_PROTOCOLLN("File found, trying to read it");
     // Converted name of "config.json" file in root of SD card
-    card.openFile("CONFIG~1.JSO", true);
+    card.openFile("CONFI~1.JSO", true);
     // get first character
     uint8_t c = card.get();
-    // print whole file
-    while (!card.eof()) {
-      // filter newlines/carriage returns/tabulators to have message in one line
-      if ((c != '\n') && (c != '\r') && (c != '\t')) {
-        SERIAL_ECHO(c);
-      }
+    if (card.eof()) {
+      card.openFile("CONFIG~1.JSO", true);
       c = card.get();
+      extractDataFromJSON(c);
     }
-    // end of message
-    SERIAL_ECHOLN("");
+    else {
+      extractDataFromJSON(c);
+    }
   } else {
     SERIAL_PROTOCOLLN("config file doesn't exist, keep going");
   }

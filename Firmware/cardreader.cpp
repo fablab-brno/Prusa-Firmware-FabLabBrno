@@ -115,8 +115,8 @@ void CardReader::lsDive(const char *prepend, SdFile parent, const char * const m
 				filenameIsDir = DIR_IS_SUBDIR(&p);
       /*#FLB*/
       if (lsAction == LS_SerialPrint) {
-        //if (strstr(longFilename, "config.json") != NULL) {
-          if (strstr(filename, "CONFIG~1.JSO") != NULL) {
+        if (strstr(longFilename, "config.json") != NULL) {
+        //if (strstr(filename, "CONFIG~1.JSO") != NULL) {
           fileExist = 1;
           SERIAL_PROTOCOL("Bool fileExist: ");
           SERIAL_PROTOCOLLN(fileExist);
