@@ -48,6 +48,7 @@ extern int Fabman_mode;
 extern char FM_IP[18];
 extern char FM_UserName[18];
 extern char FM_VER[18];
+extern bool lock_FM_FW_TYPE;
 extern bool selected_FM_FW_TYPE;
 extern char *username;
 bool stoppedInfo;
