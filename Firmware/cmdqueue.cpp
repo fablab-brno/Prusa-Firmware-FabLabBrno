@@ -224,9 +224,13 @@ void cmdqueue_dump_to_serial_single_line(int nr, const char *p)
     SERIAL_ECHOPGM("Entry nr: ");
     SERIAL_ECHO(nr);
     SERIAL_ECHOPGM(", type: ");
-    SERIAL_ECHO(int(*p));
+    int type = *p;
+    SERIAL_ECHO(type);
+    SERIAL_ECHOPGM(", size: ");
+    unsigned int size = *(unsigned int*)(p + 1);
+    SERIAL_ECHO(size);
     SERIAL_ECHOPGM(", cmd: ");
-    SERIAL_ECHO(p+1);  
+    SERIAL_ECHO(p + CMDHDRSIZE);
     SERIAL_ECHOLNPGM("");
 }
 
@@ -247,7 +251,7 @@ void cmdqueue_dump_to_serial()
             for (const char *p = cmdbuffer + bufindr; p < cmdbuffer + bufindw; ++ nr) {
                 cmdqueue_dump_to_serial_single_line(nr, p);
                 // Skip the command.
-                for (++p; *p != 0; ++ p);
+                for (p += CMDHDRSIZE; *p != 0; ++ p);
                 // Skip the gaps.
                 for (++p; p < cmdbuffer + bufindw && *p == 0; ++ p);
             }
@@ -255,14 +259,14 @@ void cmdqueue_dump_to_serial()
             for (const char *p = cmdbuffer + bufindr; p < cmdbuffer + sizeof(cmdbuffer); ++ nr) {
                 cmdqueue_dump_to_serial_single_line(nr, p);
                 // Skip the command.
-                for (++p; *p != 0; ++ p);
+                for (p += CMDHDRSIZE; *p != 0; ++ p);
                 // Skip the gaps.
                 for (++p; p < cmdbuffer + sizeof(cmdbuffer) && *p == 0; ++ p);
             }
             for (const char *p = cmdbuffer; p < cmdbuffer + bufindw; ++ nr) {
                 cmdqueue_dump_to_serial_single_line(nr, p);
                 // Skip the command.
-                for (++p; *p != 0; ++ p);
+                for (p += CMDHDRSIZE; *p != 0; ++ p);
                 // Skip the gaps.
                 for (++p; p < cmdbuffer + bufindw && *p == 0; ++ p);
             }
@@ -587,7 +591,10 @@ void get_command()
         int hours, minutes;
         minutes=(t/60)%60;
         hours=t/60/60;
-        filament_used_in_last_print(); /*#FLB*/
+        /*#FLB*/
+        time_used_in_last_print = t;
+        filament_used_in_last_print();
+        /*#FLB*/
         save_statistics(total_filament_used, t);
         sprintf_P(time, PSTR("%i hours %i minutes"),hours, minutes);
         SERIAL_ECHO_START;
@@ -599,7 +606,7 @@ void get_command()
         if (farm_mode)
         {
             prusa_statistics(6);
-            lcd_commands_type = LCD_COMMAND_FARM_MODE_CONFIRM;
+            lcd_commands_type = LcdCommands::FarmModeConfirm;
         }
 
       }
