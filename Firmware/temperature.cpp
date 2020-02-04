@@ -44,8 +44,6 @@
 #include "Timer.h"
 #include "Configuration_prusa.h"
 
-
-
 //===========================================================================
 //=============================public variables============================
 //===========================================================================
@@ -75,10 +73,6 @@ int current_voltage_raw_bed = 0;
 
 int current_temperature_bed_raw = 0;
 float current_temperature_bed = 0.0;
-#ifdef TEMP_SENSOR_1_AS_REDUNDANT
-  int redundant_temperature_raw = 0;
-  float redundant_temperature = 0.0;
-#endif
   
 
 #ifdef PIDTEMP
@@ -177,13 +171,8 @@ static int bed_minttemp_raw = HEATER_BED_RAW_LO_TEMP;
 static int bed_maxttemp_raw = HEATER_BED_RAW_HI_TEMP;
 #endif
 
-#ifdef TEMP_SENSOR_1_AS_REDUNDANT
-  static void *heater_ttbl_map[2] = {(void *)HEATER_0_TEMPTABLE, (void *)HEATER_1_TEMPTABLE };
-  static uint8_t heater_ttbllen_map[2] = { HEATER_0_TEMPTABLE_LEN, HEATER_1_TEMPTABLE_LEN };
-#else
-  static void *heater_ttbl_map[EXTRUDERS] = ARRAY_BY_EXTRUDERS( (void *)HEATER_0_TEMPTABLE, (void *)HEATER_1_TEMPTABLE, (void *)HEATER_2_TEMPTABLE );
-  static uint8_t heater_ttbllen_map[EXTRUDERS] = ARRAY_BY_EXTRUDERS( HEATER_0_TEMPTABLE_LEN, HEATER_1_TEMPTABLE_LEN, HEATER_2_TEMPTABLE_LEN );
-#endif
+static void *heater_ttbl_map[EXTRUDERS] = ARRAY_BY_EXTRUDERS( (void *)HEATER_0_TEMPTABLE, (void *)HEATER_1_TEMPTABLE, (void *)HEATER_2_TEMPTABLE );
+static uint8_t heater_ttbllen_map[EXTRUDERS] = ARRAY_BY_EXTRUDERS( HEATER_0_TEMPTABLE_LEN, HEATER_1_TEMPTABLE_LEN, HEATER_2_TEMPTABLE_LEN );
 
 static float analog2temp(int raw, uint8_t e);
 static float analog2tempBed(int raw);
@@ -196,11 +185,6 @@ enum TempRunawayStates
 	TempRunaway_PREHEAT = 1,
 	TempRunaway_ACTIVE = 2,
 };
-
-#ifdef WATCH_TEMP_PERIOD
-int watch_start_temp[EXTRUDERS] = ARRAY_BY_EXTRUDERS(0,0,0);
-unsigned long watchmillis[EXTRUDERS] = ARRAY_BY_EXTRUDERS(0,0,0);
-#endif //WATCH_TEMP_PERIOD
 
 #ifndef SOFT_PWM_SCALE
 #define SOFT_PWM_SCALE 0
@@ -500,9 +484,9 @@ void checkFanSpeed()
 	max_print_fan_errors = 15; //15 seconds
 	max_extruder_fan_errors = 5; //5 seconds
 #endif //FAN_SOFT_PWM
-
+  
   if(fans_check_enabled != false)
-	fans_check_enabled = (eeprom_read_byte((uint8_t*)EEPROM_FAN_CHECK_ENABLED) > 0);
+	  fans_check_enabled = (eeprom_read_byte((uint8_t*)EEPROM_FAN_CHECK_ENABLED) > 0);
 	static unsigned char fan_speed_errors[2] = { 0,0 };
 #if (defined(FANCHECK) && defined(TACH_0) && (TACH_0 >-1))
 	if ((fan_speed[0] == 0) && (current_temperature[0] > EXTRUDER_AUTO_FAN_TEMPERATURE)){ fan_speed_errors[0]++;}
@@ -519,14 +503,17 @@ void checkFanSpeed()
 	// drop the fan_check_error flag when both fans are ok
 	if( fan_speed_errors[0] == 0 && fan_speed_errors[1] == 0 && fan_check_error == EFCE_REPORTED){
 		// we may even send some info to the LCD from here
-		fan_check_error = EFCE_OK;
+		fan_check_error = EFCE_FIXED;
 	}
-
-	if ((fan_speed_errors[0] > max_extruder_fan_errors) && fans_check_enabled) {
+	if ((fan_check_error == EFCE_FIXED) && !PRINTER_ACTIVE){
+		fan_check_error = EFCE_OK; //if the issue is fixed while the printer is doing nothing, reenable processing immediately.
+		lcd_reset_alert_level(); //for another fan speed error
+	}
+	if ((fan_speed_errors[0] > max_extruder_fan_errors) && fans_check_enabled && (fan_check_error == EFCE_OK)) {
 		fan_speed_errors[0] = 0;
 		fanSpeedError(0); //extruder fan
 	}
-	if ((fan_speed_errors[1] > max_print_fan_errors) && fans_check_enabled) {
+	if ((fan_speed_errors[1] > max_print_fan_errors) && fans_check_enabled && (fan_check_error == EFCE_OK)) {
 		fan_speed_errors[1] = 0;
 		fanSpeedError(1); //print fan
 	}
@@ -545,31 +532,31 @@ static void fanSpeedErrorBeep(const char *serialMsg, const char *lcdMsg){
 }
 
 void fanSpeedError(unsigned char _fan) {
-	if (get_message_level() != 0 && isPrintPaused) return; 
-	//to ensure that target temp. is not set to zero in case taht we are resuming print 
+	if (get_message_level() != 0 && isPrintPaused) return;
+	//to ensure that target temp. is not set to zero in case that we are resuming print
 	if (card.sdprinting || is_usb_printing) {
 		if (heating_status != 0) {
 			lcd_print_stop();
 		}
 		else {
-			fan_check_error = EFCE_DETECTED;
+			fan_check_error = EFCE_DETECTED; //plans error for next processed command
 		}
 	}
 	else {
-			SERIAL_PROTOCOLLNRPGM(MSG_OCTOPRINT_PAUSE); //for octoprint
-			setTargetHotend0(0);
-      heating_status = 0;
-      fan_check_error = EFCE_REPORTED;
+		// SERIAL_PROTOCOLLNRPGM(MSG_OCTOPRINT_PAUSED); //Why pause octoprint? is_usb_printing would be true in that case, so there is no need for this.
+		setTargetHotend0(0);
+        heating_status = 0;
+        fan_check_error = EFCE_REPORTED;
 	}
 	switch (_fan) {
 	case 0:	// extracting the same code from case 0 and case 1 into a function saves 72B
-		fanSpeedErrorBeep(PSTR("Extruder fan speed is lower than expected"), PSTR("Err: EXTR. FAN ERROR") );
+		fanSpeedErrorBeep(PSTR("Extruder fan speed is lower than expected"), MSG_FANCHECK_EXTRUDER);
 		break;
 	case 1:
-		fanSpeedErrorBeep(PSTR("Print fan speed is lower than expected"), PSTR("Err: PRINT FAN ERROR") );
+		fanSpeedErrorBeep(PSTR("Print fan speed is lower than expected"), MSG_FANCHECK_PRINT);
 		break;
 	}
-  SERIAL_PROTOCOLLNRPGM(MSG_OK);
+    // SERIAL_PROTOCOLLNRPGM(MSG_OK); //This ok messes things up with octoprint.
 }
 #endif //(defined(TACH_0) && TACH_0 >-1) || (defined(TACH_1) && TACH_1 > -1)
 
@@ -730,34 +717,6 @@ void manage_heater()
     {
       soft_pwm[e] = 0;
     }
-
-    #ifdef WATCH_TEMP_PERIOD
-    if(watchmillis[e] && _millis() - watchmillis[e] > WATCH_TEMP_PERIOD)
-    {
-        if(degHotend(e) < watch_start_temp[e] + WATCH_TEMP_INCREASE)
-        {
-            setTargetHotend(0, e);
-            LCD_MESSAGEPGM("Heating failed");
-            SERIAL_ECHO_START;
-            SERIAL_ECHOLN("Heating failed");
-        }else{
-            watchmillis[e] = 0;
-        }
-    }
-    #endif
-    #ifdef TEMP_SENSOR_1_AS_REDUNDANT
-      if(fabs(current_temperature[0] - redundant_temperature) > MAX_REDUNDANT_TEMP_SENSOR_DIFF) {
-        disable_heater();
-        if(IsStopped() == false) {
-          SERIAL_ERROR_START;
-          SERIAL_ERRORLNPGM("Extruder switched off. Temperature difference between temp sensors is too high !");
-          LCD_ALERTMESSAGEPGM("Err: REDUNDANT TEMP ERROR");
-        }
-        #ifndef BOGUS_TEMPERATURE_FAILSAFE_OVERRIDE
-          Stop();
-        #endif
-      }
-    #endif
   } // End extruder for loop
 
 #define FAN_CHECK_PERIOD 5000 //5s
@@ -909,11 +868,7 @@ void manage_heater()
 // Derived from RepRap FiveD extruder::getTemperature()
 // For hot end temperature measurement.
 static float analog2temp(int raw, uint8_t e) {
-#ifdef TEMP_SENSOR_1_AS_REDUNDANT
-  if(e > EXTRUDERS)
-#else
   if(e >= EXTRUDERS)
-#endif
   {
       SERIAL_ERROR_START;
       SERIAL_ERROR((int)e);
@@ -1055,10 +1010,6 @@ static void updateTemperaturesFromRawValues()
 #else //DEBUG_HEATER_BED_SIM
 	current_temperature_bed = analog2tempBed(current_temperature_bed_raw);
 #endif //DEBUG_HEATER_BED_SIM
-
-    #ifdef TEMP_SENSOR_1_AS_REDUNDANT
-      redundant_temperature = analog2temp(redundant_temperature_raw, 1);
-    #endif
 
     CRITICAL_SECTION_START;
     temp_meas_ready = false;
@@ -1223,20 +1174,6 @@ void tp_init()
 #endif //BED_MAXTEMP
 }
 
-void setWatch() 
-{  
-#ifdef WATCH_TEMP_PERIOD
-  for (int e = 0; e < EXTRUDERS; e++)
-  {
-    if(degHotend(e) < degTargetHotend(e) - (WATCH_TEMP_INCREASE * 2))
-    {
-      watch_start_temp[e] = degHotend(e);
-      watchmillis[e] = _millis();
-    } 
-  }
-#endif 
-}
-
 #if (defined (TEMP_RUNAWAY_BED_HYSTERESIS) && TEMP_RUNAWAY_BED_TIMEOUT > 0) || (defined (TEMP_RUNAWAY_EXTRUDER_HYSTERESIS) && TEMP_RUNAWAY_EXTRUDER_TIMEOUT > 0)
 void temp_runaway_check(int _heater_id, float _target_temperature, float _current_temperature, float _output, bool _isbed)
 {
@@ -1399,8 +1336,8 @@ void temp_runaway_stop(bool isPreheat, bool isBed)
 	manage_heater();
 	lcd_update(0);
   Sound_MakeCustom(200,0,true);
-
-	if (isPreheat)
+	
+  if (isPreheat)
 	{
 		Stop();
 		isBed ? LCD_ALERTMESSAGEPGM("BED PREHEAT ERROR") : LCD_ALERTMESSAGEPGM("PREHEAT ERROR");
@@ -1460,7 +1397,7 @@ void disable_heater()
     target_temperature_bed=0;
     soft_pwm_bed=0;
 	timer02_set_pwm0(soft_pwm_bed << 1);
-    #if defined(HEATER_BED_PIN) && HEATER_BED_PIN > -1  
+    #if defined(HEATER_BED_PIN) && HEATER_BED_PIN > -1
       //WRITE(HEATER_BED_PIN,LOW);
     #endif
   #endif 
@@ -1631,7 +1568,9 @@ extern "C" {
 void adc_ready(void) //callback from adc when sampling finished
 {
 	current_temperature_raw[0] = adc_values[ADC_PIN_IDX(TEMP_0_PIN)]; //heater
+#ifdef PINDA_THERMISTOR
 	current_temperature_raw_pinda_fast = adc_values[ADC_PIN_IDX(TEMP_PINDA_PIN)];
+#endif //PINDA_THERMISTOR
 	current_temperature_bed_raw = adc_values[ADC_PIN_IDX(TEMP_BED_PIN)];
 #ifdef VOLT_PWR_PIN
 	current_voltage_raw_pwr = adc_values[ADC_PIN_IDX(VOLT_PWR_PIN)];
@@ -1646,7 +1585,6 @@ void adc_ready(void) //callback from adc when sampling finished
 }
 
 } // extern "C"
-
 
 // Timer2 (originaly timer0) is shared with millies
 #ifdef SYSTEM_TIMER_2
@@ -1727,14 +1665,14 @@ ISR(TIMER0_COMPB_vect)
   if ((pwm_count & ((1 << HEATER_BED_SOFT_PWM_BITS) - 1)) == 0)
   {
     soft_pwm_b = soft_pwm_bed >> (7 - HEATER_BED_SOFT_PWM_BITS);
-#ifndef SYSTEM_TIMER_2
+#  ifndef SYSTEM_TIMER_2
 	// tady budu krokovat pomalou frekvenci na automatu - tohle je rizeni spinani a rozepinani
 	// jako ridici frekvenci mam 2khz, jako vystupni frekvenci mam 30hz
 	// 2kHz jsou ovsem ve slysitelnem pasmu, mozna bude potreba jit s frekvenci nahoru (a tomu taky prizpusobit ostatni veci)
 	// Teoreticky bych mohl stahnout OCR0B citac na 6, cimz bych se dostal nekam ke 40khz a tady potom honit PWM rychleji nebo i pomaleji
 	// to nicemu nevadi. Soft PWM scale by se 20x zvetsilo (no dobre, 16x), cimz by se to posunulo k puvodnimu 30Hz PWM
 	//if(soft_pwm_b > 0) WRITE(HEATER_BED_PIN,1); else WRITE(HEATER_BED_PIN,0);
-#endif //SYSTEM_TIMER_2
+#  endif //SYSTEM_TIMER_2
   }
 #endif
 #endif

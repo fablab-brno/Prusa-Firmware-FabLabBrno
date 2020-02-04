@@ -427,7 +427,7 @@ void mmu_loop(void)
 			{
 				if (mmu_attempt_nr++ < MMU_MAX_RESEND_ATTEMPTS &&
 				    mmu_last_cmd >= MmuCmd::T0 && mmu_last_cmd <= MmuCmd::T4)
-			{
+				{
 				    DEBUG_PRINTF_P(PSTR("MMU retry attempt nr. %d\n"), mmu_attempt_nr - 1);
 					mmu_cmd = mmu_last_cmd;
 				}
@@ -1074,27 +1074,6 @@ void mmu_filament_ramming()
     }
 }
 
-//-//
-void extr_unload_()
-{
-//if(bFilamentAction)
-if(0)
-	{
-     bFilamentAction=false;
-     extr_unload();
-     }
-else	{
-     eFilamentAction=FilamentAction::MmuUnLoad;
-     bFilamentFirstRun=false;
-     if(target_temperature[0]>=EXTRUDE_MINTEMP)
-          {
-          bFilamentPreheatState=true;
-          mFilamentItem(target_temperature[0],target_temperature_bed);
-          }
-//     else menu_submenu(mFilamentMenu);
-     else mFilamentMenu();
-	}
-}
 
 //! @brief show which filament is currently unloaded
 void extr_unload_view()
@@ -1362,36 +1341,36 @@ void mmu_show_warning()
 void lcd_mmu_load_to_nozzle(uint8_t filament_nr)
 {
     menu_back();
-bFilamentAction=false;                            // NOT in "mmu_load_to_nozzle_menu()"
-  if (degHotend0() > EXTRUDE_MINTEMP)
-  {
-	tmp_extruder = filament_nr;
-	lcd_update_enable(false);
-	lcd_clear();
+    bFilamentAction = false;                            // NOT in "mmu_load_to_nozzle_menu()"
+    if (degHotend0() > EXTRUDE_MINTEMP)
+    {
+        tmp_extruder = filament_nr;
+        lcd_update_enable(false);
+        lcd_clear();
         lcd_set_cursor(0, 1);
         lcd_puts_P(_T(MSG_LOADING_FILAMENT));
-	lcd_print(" ");
-	lcd_print(tmp_extruder + 1);
-	mmu_command(MmuCmd::T0 + tmp_extruder);
-	manage_response(true, true, MMU_TCODE_MOVE);
-	mmu_continue_loading(false);
-	mmu_extruder = tmp_extruder; //filament change is finished
+        lcd_print(" ");
+        lcd_print(tmp_extruder + 1);
+        mmu_command(MmuCmd::T0 + tmp_extruder);
+        manage_response(true, true, MMU_TCODE_MOVE);
+        mmu_continue_loading(false);
+        mmu_extruder = tmp_extruder; //filament change is finished
         marlin_rise_z();
-	mmu_load_to_nozzle();
-	load_filament_final_feed();
-	st_synchronize();
+        mmu_load_to_nozzle();
+        load_filament_final_feed();
+        st_synchronize();
         custom_message_type = CustomMsg::FilamentLoading;
-	lcd_setstatuspgm(_T(MSG_LOADING_FILAMENT));
-	lcd_return_to_status();
-	lcd_update_enable(true);	
-	lcd_load_filament_color_check();
-	lcd_setstatuspgm(_T(WELCOME_MSG));
+        lcd_setstatuspgm(_T(MSG_LOADING_FILAMENT));
+        lcd_return_to_status();
+        lcd_update_enable(true);
+        lcd_load_filament_color_check();
+        lcd_setstatuspgm(_T(WELCOME_MSG));
         custom_message_type = CustomMsg::Status;
-  }
-  else
-  {
-	  show_preheat_nozzle_warning();
-  }
+    }
+    else
+    {
+        show_preheat_nozzle_warning();
+    }
 }
 
 #ifdef MMU_HAS_CUTTER

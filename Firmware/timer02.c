@@ -47,9 +47,7 @@ void timer0_init(void)
 
 // The following code is OVF handler for timer 2
 // it was copy-pasted from wiring.c and modified for timer2
-//variables timer0_overflow_count and timer0_millis are declared in wiring.c
-
-
+// variables timer0_overflow_count and timer0_millis are declared in wiring.c
 
 // the prescaler is set so that timer0 ticks every 64 clock cycles, and the
 // the overflow handler is called every 256 ticks.

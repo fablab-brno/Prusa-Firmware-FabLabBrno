@@ -15,7 +15,7 @@
 
 extern int32_t lcd_encoder;
 
-#define MENU_DEPTH_MAX       6
+#define MENU_DEPTH_MAX       7
 
 static menu_record_t menu_stack[MENU_DEPTH_MAX];
 
@@ -106,7 +106,7 @@ static void menu_back_no_reset(void)
 {
 	if (menu_depth > 0)
 	{
-		menu_depth--;
+		menu_depth--;		
 		menu_goto(menu_stack[menu_depth].menu, menu_stack[menu_depth].position, true, false);
 	}
 }
@@ -245,7 +245,6 @@ static void menu_draw_item_puts_P(char type_char, const char* str, char num)
     lcd_set_cursor(19, menu_row);
     lcd_putc(type_char);
 }
-
 
 /*
 int menu_draw_item_puts_P_int16(char type_char, const char* str, int16_t val, )
@@ -421,7 +420,7 @@ const char menu_fmt_float31[] PROGMEM = "%-12.12S%+8.1f";
 
 const char menu_fmt_float13[] PROGMEM = "%c%-13.13S%+5.3f";
 
-const char menu_fmt_float13off[] PROGMEM = "%c%-13.13S%6.6s";
+const char menu_fmt_float13off[] PROGMEM = "%c%-13.13S%6.6S";
 
 template<typename T>
 static void menu_draw_P(char chr, const char* str, int16_t val);
@@ -445,7 +444,7 @@ void menu_draw_P<uint8_t*>(char chr, const char* str, int16_t val)
     float factor = 1.0f + static_cast<float>(val) / 1000.0f;
     if (val <= _md->minEditValue)
     {
-        lcd_printf_P(menu_fmt_float13off, chr, str, " [off]");
+        lcd_printf_P(menu_fmt_float13off, chr, str, _i(" [off]"));
     }
     else
     {
@@ -507,7 +506,7 @@ uint8_t menu_item_edit_P(const char* str, T pval, int16_t min_val, int16_t max_v
 	menu_data_edit_t* _md = (menu_data_edit_t*)&(menu_data[0]);
 	if (menu_item == menu_line)
 	{
-		if (lcd_draw_update)
+		if (lcd_draw_update) 
 		{
 			lcd_set_cursor(0, menu_row);
 			menu_draw_P<T>(menu_selection_mark(), str, *pval);

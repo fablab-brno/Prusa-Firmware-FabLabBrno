@@ -223,6 +223,7 @@ void CardReader::initsd()
   }
   workDir=root;
   curDir=&root;
+  workDirDepth = 0;
 
   #ifdef SDCARD_SORT_ALPHA
 	presort();

@@ -117,7 +117,7 @@ static void lcd_writebits(uint8_t value)
 	WRITE(LCD_PINS_D5, value & 0x20);
 	WRITE(LCD_PINS_D6, value & 0x40);
 	WRITE(LCD_PINS_D7, value & 0x80);
-
+	
 	lcd_pulseEnable();
 }
 
@@ -163,9 +163,9 @@ static void lcd_begin(uint8_t clear)
 	lcd_currline = 0;
 
 	lcd_send(LCD_FUNCTIONSET | LCD_8BITMODE, LOW | LCD_HALF_FLAG, 4500); // wait min 4.1ms
-		// second try
+	// second try
 	lcd_send(LCD_FUNCTIONSET | LCD_8BITMODE, LOW | LCD_HALF_FLAG, 150);
-		// third go!
+	// third go!
 	lcd_send(LCD_FUNCTIONSET | LCD_8BITMODE, LOW | LCD_HALF_FLAG, 150);
 #ifndef LCD_8BIT
 	// set to 4-bit interface
@@ -173,7 +173,7 @@ static void lcd_begin(uint8_t clear)
 #endif
 
 	// finally, set # lines, font size, etc.0
-	lcd_command(LCD_FUNCTIONSET | lcd_displayfunction);  
+	lcd_command(LCD_FUNCTIONSET | lcd_displayfunction);
 	// turn the display on with no cursor or blinking default
 	lcd_displaycontrol = LCD_CURSOROFF | LCD_BLINKOFF;  
 	lcd_display();
@@ -189,9 +189,10 @@ static void lcd_begin(uint8_t clear)
 	#endif
 }
 
-static void lcd_putchar(char c, FILE *)
+static int lcd_putchar(char c, FILE *)
 {
 	lcd_write(c);
+	return 0;
 }
 
 void lcd_init(void)
@@ -232,8 +233,6 @@ void lcd_refresh_noclear(void)
     lcd_set_custom_characters();
 }
 
-
-
 void lcd_clear(void)
 {
 	lcd_command(LCD_CLEARDISPLAY, 1600);  // clear display, set cursor position to zero
@@ -250,7 +249,7 @@ void lcd_home(void)
 void lcd_display(void)
 {
     lcd_displaycontrol |= LCD_DISPLAYON;
-	lcd_command(LCD_DISPLAYCONTROL | lcd_displaycontrol);
+    lcd_command(LCD_DISPLAYCONTROL | lcd_displaycontrol);
 }
 
 #if 0
@@ -623,16 +622,6 @@ void lcd_printFloat(double number, uint8_t digits)
 }
 
 
-
-
-
-
-
-
-
-
-
-
 uint8_t lcd_draw_update = 2;
 int32_t lcd_encoder = 0;
 uint8_t lcd_encoder_bits = 0;
@@ -696,13 +685,6 @@ void lcd_quick_feedback(void)
   lcd_button_pressed = false;
   lcd_beeper_quick_feedback();
 }
-
-
-
-
-
-
-
 
 void lcd_update(uint8_t lcdDrawUpdateOverride)
 {
@@ -779,8 +761,7 @@ void lcd_buttons_update(void)
             //else if (menu_menu == lcd_move_z) lcd_quick_feedback();
             //lcd_button_pressed is set back to false via lcd_quick_feedback function
         }
-        else
-            lcd_long_press_active = 0;
+        lcd_long_press_active = 0;
     }
 
 	lcd_buttons = newbutton;

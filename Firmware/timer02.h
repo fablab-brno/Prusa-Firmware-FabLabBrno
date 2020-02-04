@@ -30,7 +30,6 @@ extern void tone2(uint8_t _pin, unsigned int frequency/*, unsigned long duration
 ///! Turn off beeping - set beeper pin to 0
 extern void noTone2(uint8_t _pin);
 
-
 #if defined(__cplusplus)
 }
 #endif //defined(__cplusplus)
