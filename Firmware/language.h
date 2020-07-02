@@ -6,7 +6,9 @@
 
 #include "config.h"
 #include <inttypes.h>
-//#include <stdio.h>
+#ifdef DEBUG_SEC_LANG
+    #include <stdio.h>
+#endif //DEBUG_SEC_LANG
 
 #define PROTOCOL_VERSION "1.0"
 
@@ -148,4 +150,3 @@ extern void lang_boot_update_start(uint8_t lang);
 
 
 #endif //LANGUAGE_H
-
