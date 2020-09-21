@@ -1,6 +1,6 @@
 //! @file
 //! @date Jun 20, 2019
-//! @author Marek B�l
+//! @author Marek Běl
 
 #include "eeprom.h"
 #include "Marlin.h"
