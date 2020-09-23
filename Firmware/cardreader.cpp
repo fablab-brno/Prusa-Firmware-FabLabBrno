@@ -246,8 +246,7 @@ void CardReader::initsd()
 
   /*#FLB*/
   if (cardOK == true) {
-    // TODO Temporary disabled, creating issues on 3.9.0
-    // getConfigFromJSON();
+    getConfigFromJSON();
   }
   /*#FLB*/
 }
