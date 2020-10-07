@@ -1,4 +1,5 @@
 //uart2.c
+#include "Configuration_prusa.h" /*#FLB*/
 #include "uart2.h"
 #include <avr/io.h>
 #include <avr/interrupt.h>
@@ -89,5 +90,8 @@ ISR(USART2_RX_vect)
 		printf_P(PSTR("USART2 rx Full!!!\n"));
 	}
 }
+#ifndef PRINTER_TYPE
+  #error "Unknown printer type set!"
+#endif
 #endif
 /*#FLB*/
