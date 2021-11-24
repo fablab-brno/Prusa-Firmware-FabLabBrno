@@ -28,3 +28,4 @@
 	void print(int v) { printf("%d", v); }
 	void print(float v) { printf("%f", v); }
 #endif //RC522_RPI
+

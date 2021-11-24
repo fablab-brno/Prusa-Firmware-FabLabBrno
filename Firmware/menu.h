@@ -10,7 +10,7 @@
 //Function pointer to menu functions.
 typedef void (*menu_func_t)(void);
 
-typedef struct
+typedef struct 
 {
     menu_func_t menu;
     int8_t position;
@@ -59,13 +59,12 @@ extern uint8_t menu_top;
 
 extern uint8_t menu_clicked;
 
-extern uint8_t menu_entering;
 extern uint8_t menu_leaving;
 
 //function pointer to the currently active menu
 extern menu_func_t menu_menu;
 
-
+extern void menu_data_reset(void);
 
 extern void menu_goto(menu_func_t menu, const uint32_t encoder, const bool feedback, bool reset_menu_state);
 
@@ -115,7 +114,8 @@ extern uint8_t menu_item_function_E(const Sheet &sheet, menu_func_t func);
 extern uint8_t menu_item_back_P(const char* str);
 
 // leaving menu - this condition must be immediately before MENU_ITEM_BACK_P
-#define ON_MENU_LEAVE(func) do { if (((menu_item == menu_line) && menu_clicked && (lcd_encoder == menu_item)) || menu_leaving){ func } } while (0)
+#define ON_MENU_LEAVE(func) do { if (menu_item_leave()){ func } } while (0)
+extern bool menu_item_leave();
 
 #define MENU_ITEM_FUNCTION_P(str, func) do { if (menu_item_function_P(str, func)) return; } while (0)
 extern uint8_t menu_item_function_P(const char* str, menu_func_t func);
@@ -136,7 +136,6 @@ extern const char menu_fmt_int3[];
 extern const char menu_fmt_float31[];
 extern const char menu_fmt_float13[];
 
-
 extern void menu_draw_float31(const char* str, float val);
 
 extern void menu_draw_float13(const char* str, float val);
@@ -154,5 +153,8 @@ extern void menu_format_sheet_E(const Sheet &sheet_E, SheetFormatBuffer &buffer)
 template <typename T>
 extern uint8_t menu_item_edit_P(const char* str, T pval, int16_t min_val, int16_t max_val);
 
+extern void menu_progressbar_init(uint16_t total, const char* title);
+extern void menu_progressbar_update(uint16_t newVal);
+extern void menu_progressbar_finish(void);
 
 #endif //_MENU_H

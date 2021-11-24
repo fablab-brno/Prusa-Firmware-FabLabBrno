@@ -30,6 +30,7 @@
 
 
 #include "Marlin.h"
+#include "cmdqueue.h"
 #include "ultralcd.h"
 #include "sound.h"
 #include "temperature.h"
@@ -158,7 +159,7 @@ uint8_t fanSpeedBckp = 255;
     uint8_t altfanOverride : 1;
   } altfanStatus;
 #endif //EXTRUDER_ALTFAN_DETECT
-#endif  
+#endif
 
 
 #if EXTRUDERS > 3
@@ -191,8 +192,8 @@ static int ambient_minttemp_raw = AMBIENT_RAW_LO_TEMP;
 static int ambient_maxttemp_raw = AMBIENT_RAW_HI_TEMP;
 #endif
 
-  static void *heater_ttbl_map[EXTRUDERS] = ARRAY_BY_EXTRUDERS( (void *)HEATER_0_TEMPTABLE, (void *)HEATER_1_TEMPTABLE, (void *)HEATER_2_TEMPTABLE );
-  static uint8_t heater_ttbllen_map[EXTRUDERS] = ARRAY_BY_EXTRUDERS( HEATER_0_TEMPTABLE_LEN, HEATER_1_TEMPTABLE_LEN, HEATER_2_TEMPTABLE_LEN );
+static void *heater_ttbl_map[EXTRUDERS] = ARRAY_BY_EXTRUDERS( (void *)HEATER_0_TEMPTABLE, (void *)HEATER_1_TEMPTABLE, (void *)HEATER_2_TEMPTABLE );
+static uint8_t heater_ttbllen_map[EXTRUDERS] = ARRAY_BY_EXTRUDERS( HEATER_0_TEMPTABLE_LEN, HEATER_1_TEMPTABLE_LEN, HEATER_2_TEMPTABLE_LEN );
 
 static float analog2temp(int raw, uint8_t e);
 static float analog2tempBed(int raw);
@@ -513,7 +514,7 @@ int getHeaterPower(int heater) {
     #if EXTRUDER_0_AUTO_FAN_PIN == FAN_PIN 
        #error "You cannot set EXTRUDER_0_AUTO_FAN_PIN equal to FAN_PIN"
     #endif
-  #endif 
+  #endif
 
 void setExtruderAutoFanState(uint8_t state)
 {
@@ -521,7 +522,7 @@ void setExtruderAutoFanState(uint8_t state)
 	//the fan to either On or Off during certain tests/errors.
 
 	fanState = state;
-	uint8_t newFanSpeed = 0;
+	newFanSpeed = 0;
 	if (fanState & 0x01)
 	{
 #ifdef EXTRUDER_ALTFAN_DETECT
@@ -560,9 +561,9 @@ void checkFanSpeed()
 	max_print_fan_errors = 15; //15 seconds
 	max_extruder_fan_errors = 5; //5 seconds
 #endif //FAN_SOFT_PWM
-
+  
   if(fans_check_enabled != false)
-	fans_check_enabled = (eeprom_read_byte((uint8_t*)EEPROM_FAN_CHECK_ENABLED) > 0);
+	  fans_check_enabled = (eeprom_read_byte((uint8_t*)EEPROM_FAN_CHECK_ENABLED) > 0);
 	static unsigned char fan_speed_errors[2] = { 0,0 };
 #if (defined(FANCHECK) && defined(TACH_0) && (TACH_0 >-1))
 	if ((fan_speed[0] < 20) && (current_temperature[0] > EXTRUDER_AUTO_FAN_TEMPERATURE)){ fan_speed_errors[0]++;}
@@ -608,7 +609,7 @@ static void fanSpeedErrorBeep(const char *serialMsg, const char *lcdMsg){
 }
 
 void fanSpeedError(unsigned char _fan) {
-	if (get_message_level() != 0 && isPrintPaused) return; 
+	if (get_message_level() != 0 && isPrintPaused) return;
 	//to ensure that target temp. is not set to zero in case that we are resuming print
 	if (card.sdprinting || is_usb_printing) {
 		if (heating_status != 0) {
@@ -620,9 +621,9 @@ void fanSpeedError(unsigned char _fan) {
 	}
 	else {
 		// SERIAL_PROTOCOLLNRPGM(MSG_OCTOPRINT_PAUSED); //Why pause octoprint? is_usb_printing would be true in that case, so there is no need for this.
-			setTargetHotend0(0);
-      heating_status = 0;
-      fan_check_error = EFCE_REPORTED;
+		setTargetHotend0(0);
+        heating_status = 0;
+        fan_check_error = EFCE_REPORTED;
 	}
 	switch (_fan) {
 	case 0:	// extracting the same code from case 0 and case 1 into a function saves 72B
@@ -632,21 +633,20 @@ void fanSpeedError(unsigned char _fan) {
 		fanSpeedErrorBeep(PSTR("Print fan speed is lower than expected"), MSG_FANCHECK_PRINT);
 		break;
 	}
-    // SERIAL_PROTOCOLLNRPGM(MSG_OK); //This ok messes things up with octoprint.
 }
 #endif //(defined(TACH_0) && TACH_0 >-1) || (defined(TACH_1) && TACH_1 > -1)
 
 
 void checkExtruderAutoFans()
 {
-  #if defined(EXTRUDER_0_AUTO_FAN_PIN) && EXTRUDER_0_AUTO_FAN_PIN > -1
+#if defined(EXTRUDER_0_AUTO_FAN_PIN) && EXTRUDER_0_AUTO_FAN_PIN > -1
 	if (!(fanState & 0x02))
-    {
+	{
 		fanState &= ~1;
 		fanState |= current_temperature[0] > EXTRUDER_AUTO_FAN_TEMPERATURE;
-    }
+	}
 	setExtruderAutoFanState(fanState);
-  #endif 
+#endif 
 }
 
 #endif // any extruder auto fan pins set
@@ -1124,9 +1124,12 @@ void tp_init()
 
   adc_init();
 
-  timer0_init();
+  timer0_init(); //enables the heatbed timer.
+
+  // timer2 already enabled earlier in the code
+  // now enable the COMPB temperature interrupt
   OCR2B = 128;
-  TIMSK2 |= (1<<OCIE2B);  
+  TIMSK2 |= (1<<OCIE2B);
   
   timer4_init(); //for tone and Extruder fan PWM
   
@@ -1397,8 +1400,8 @@ void temp_runaway_stop(bool isPreheat, bool isBed)
 	manage_heater();
 	lcd_update(0);
   Sound_MakeCustom(200,0,true);
-
-	if (isPreheat)
+	
+  if (isPreheat)
 	{
 		Stop();
 		isBed ? LCD_ALERTMESSAGEPGM("BED PREHEAT ERROR") : LCD_ALERTMESSAGEPGM("PREHEAT ERROR");
@@ -1461,7 +1464,7 @@ void disable_heater()
     soft_pwm_bed=0;
 	timer02_set_pwm0(soft_pwm_bed << 1);
 	bedPWMDisabled = 0;
-    #if defined(HEATER_BED_PIN) && HEATER_BED_PIN > -1  
+    #if defined(HEATER_BED_PIN) && HEATER_BED_PIN > -1
       //WRITE(HEATER_BED_PIN,LOW);
     #endif
   #endif 
@@ -1516,7 +1519,7 @@ void max_temp_error(uint8_t e) {
   #ifndef BOGUS_TEMPERATURE_FAILSAFE_OVERRIDE
   Stop();
   #endif
-    
+
     SET_OUTPUT(FAN_PIN);
     SET_OUTPUT(BEEPER);
     WRITE(FAN_PIN, 1);
@@ -1564,7 +1567,6 @@ void bed_max_temp_error(void) {
   #ifndef BOGUS_TEMPERATURE_FAILSAFE_OVERRIDE
   Stop();
   #endif
-
 }
 
 void bed_min_temp_error(void) {
@@ -1766,14 +1768,14 @@ FORCE_INLINE static void temperature_isr()
   if ((pwm_count & ((1 << HEATER_BED_SOFT_PWM_BITS) - 1)) == 0)
   {
     soft_pwm_b = soft_pwm_bed >> (7 - HEATER_BED_SOFT_PWM_BITS);
-#ifndef SYSTEM_TIMER_2
+#  ifndef SYSTEM_TIMER_2
 	// tady budu krokovat pomalou frekvenci na automatu - tohle je rizeni spinani a rozepinani
 	// jako ridici frekvenci mam 2khz, jako vystupni frekvenci mam 30hz
 	// 2kHz jsou ovsem ve slysitelnem pasmu, mozna bude potreba jit s frekvenci nahoru (a tomu taky prizpusobit ostatni veci)
 	// Teoreticky bych mohl stahnout OCR0B citac na 6, cimz bych se dostal nekam ke 40khz a tady potom honit PWM rychleji nebo i pomaleji
 	// to nicemu nevadi. Soft PWM scale by se 20x zvetsilo (no dobre, 16x), cimz by se to posunulo k puvodnimu 30Hz PWM
 	//if(soft_pwm_b > 0) WRITE(HEATER_BED_PIN,1); else WRITE(HEATER_BED_PIN,0);
-#endif //SYSTEM_TIMER_2
+#  endif //SYSTEM_TIMER_2
   }
 #endif
 #endif
@@ -2045,18 +2047,18 @@ FORCE_INLINE static void temperature_isr()
    
     if(curTodo>0)
     {
-		asm("cli");
+      CRITICAL_SECTION_START;
       babystep(axis,/*fwd*/true);
       babystepsTodo[axis]--; //less to do next time
-		asm("sei");
+      CRITICAL_SECTION_END;
     }
     else
     if(curTodo<0)
     {
-		asm("cli");
+      CRITICAL_SECTION_START;
       babystep(axis,/*fwd*/false);
       babystepsTodo[axis]++; //less to do next time
-		asm("sei");
+      CRITICAL_SECTION_END;
     }
   }
 #endif //BABYSTEPPING
@@ -2080,8 +2082,8 @@ ISR(TIMER0_COMPB_vect)
         sei();
         temperature_isr();
         cli();
-	_lock = false;
-}
+        _lock = false;
+    }
 }
 
 void check_max_temp()
@@ -2326,11 +2328,22 @@ float unscalePID_d(float d)
 //!
 //! @retval true firmware should do temperature compensation and allow calibration
 //! @retval false PINDA thermistor is not detected, disable temperature compensation and calibration
+//! @retval true/false when forced via LCD menu Settings->HW Setup->SuperPINDA
 //!
 bool has_temperature_compensation()
 {
-#ifdef DETECT_SUPERPINDA
-    return (current_temperature_pinda >= PINDA_MINTEMP) ? true : false;
+#ifdef SUPERPINDA_SUPPORT
+#ifdef PINDA_TEMP_COMP
+   	uint8_t pinda_temp_compensation = eeprom_read_byte((uint8_t*)EEPROM_PINDA_TEMP_COMPENSATION);
+    if (pinda_temp_compensation == EEPROM_EMPTY_VALUE) //Unkown PINDA temp compenstation, so check it.
+      {
+#endif //PINDA_TEMP_COMP
+        return (current_temperature_pinda >= PINDA_MINTEMP) ? true : false;
+#ifdef PINDA_TEMP_COMP
+      }
+    else if (pinda_temp_compensation == 0) return true; //Overwritten via LCD menu SuperPINDA [No]
+    else return false; //Overwritten via LCD menu SuperPINDA [YES]
+#endif //PINDA_TEMP_COMP
 #else
     return true;
 #endif

@@ -277,7 +277,7 @@ void calculate_trapezoid_for_block(block_t *block, float entry_speed, float exit
     }
 
 #ifdef LIN_ADVANCE
-  if (block->use_advance_lead) {
+    if (block->use_advance_lead) {
         if(!accelerate_steps || !decelerate_steps) {
             // accelerate_steps=0: deceleration-only ramp, max_rate is effectively unused
             // decelerate_steps=0: acceleration-only ramp, max_rate _is_ final_rate
@@ -286,7 +286,7 @@ void calculate_trapezoid_for_block(block_t *block, float entry_speed, float exit
             float max_rate = sqrt(acceleration_x2 * accelerate_steps + initial_rate_sqr);
             max_adv_steps = max_rate * block->adv_comp;
         }
-  }
+    }
 #endif
   }
 
@@ -456,9 +456,9 @@ void plan_init() {
   block_buffer_head = 0;
   block_buffer_tail = 0;
   memset(position, 0, sizeof(position)); // clear position
-#ifdef LIN_ADVANCE
+  #ifdef LIN_ADVANCE
   memset(position_float, 0, sizeof(position_float)); // clear position
-#endif
+  #endif
   previous_speed[0] = 0.0;
   previous_speed[1] = 0.0;
   previous_speed[2] = 0.0;
@@ -842,9 +842,9 @@ void plan_buffer_line(float x, float y, float z, const float &e, float feed_rate
     if(degHotend(active_extruder)<extrude_min_temp)
     {
       position[E_AXIS]=target[E_AXIS]; //behave as if the move really took place, but ignore E part
-#ifdef LIN_ADVANCE
+      #ifdef LIN_ADVANCE
       position_float[E_AXIS] = e;
-#endif
+      #endif
       SERIAL_ECHO_START;
       SERIAL_ECHOLNRPGM(_n(" cold extrusion prevented"));////MSG_ERR_COLD_EXTRUDE_STOP
     }
@@ -853,9 +853,9 @@ void plan_buffer_line(float x, float y, float z, const float &e, float feed_rate
     if(labs(target[E_AXIS]-position[E_AXIS])>cs.axis_steps_per_unit[E_AXIS]*EXTRUDE_MAXLENGTH)
     {
       position[E_AXIS]=target[E_AXIS]; //behave as if the move really took place, but ignore E part
-#ifdef LIN_ADVANCE
-        position_float[E_AXIS] = e;
-#endif
+      #ifdef LIN_ADVANCE
+      position_float[E_AXIS] = e;
+      #endif
       SERIAL_ECHO_START;
       SERIAL_ECHOLNRPGM(_n(" too long extrusion prevented"));////MSG_ERR_LONG_EXTRUDE_STOP
     }
@@ -1082,7 +1082,8 @@ Having the real displacement of the head, we can calculate the total movement le
   }
   else
   {
-    block->acceleration_st = ceil(cs.acceleration * steps_per_mm); // convert to: acceleration steps/sec^2
+    float acceleration = (block->steps_e.wide == 0? cs.travel_acceleration: cs.acceleration);
+    block->acceleration_st = ceil(acceleration * steps_per_mm); // convert to: acceleration steps/sec^2
 
     #ifdef LIN_ADVANCE
     /**
@@ -1344,12 +1345,12 @@ Having the real displacement of the head, we can calculate the total movement le
   // Update position
   memcpy(position, target, sizeof(target)); // position[] = target[]
 
-#ifdef LIN_ADVANCE
+  #ifdef LIN_ADVANCE
   position_float[X_AXIS] = x;
   position_float[Y_AXIS] = y;
   position_float[Z_AXIS] = z;
   position_float[E_AXIS] = e;
-#endif
+  #endif
     
   // Recalculate the trapezoids to maximize speed at the segment transitions while respecting
   // the machine limits (maximum acceleration and maximum jerk).
@@ -1405,12 +1406,12 @@ void plan_set_position(float x, float y, float z, const float &e)
   position[Z_AXIS] = lround(z*cs.axis_steps_per_unit[Z_AXIS]);
 #endif // ENABLE_MESH_BED_LEVELING
   position[E_AXIS] = lround(e*cs.axis_steps_per_unit[E_AXIS]);
-#ifdef LIN_ADVANCE
+  #ifdef LIN_ADVANCE
   position_float[X_AXIS] = x;
   position_float[Y_AXIS] = y;
   position_float[Z_AXIS] = z;
   position_float[E_AXIS] = e;
-#endif
+  #endif
   st_set_position(position[X_AXIS], position[Y_AXIS], position[Z_AXIS], position[E_AXIS]);
   previous_nominal_speed = 0.0; // Resets planner junction speeds. Assumes start from rest.
   previous_speed[0] = 0.0;
@@ -1422,11 +1423,11 @@ void plan_set_position(float x, float y, float z, const float &e)
 // Only useful in the bed leveling routine, when the mesh bed leveling is off.
 void plan_set_z_position(const float &z)
 {
-	#ifdef LIN_ADVANCE
-	position_float[Z_AXIS] = z;
-	#endif
-    position[Z_AXIS] = lround(z*cs.axis_steps_per_unit[Z_AXIS]);
-    st_set_position(position[X_AXIS], position[Y_AXIS], position[Z_AXIS], position[E_AXIS]);
+  #ifdef LIN_ADVANCE
+  position_float[Z_AXIS] = z;
+  #endif
+  position[Z_AXIS] = lround(z*cs.axis_steps_per_unit[Z_AXIS]);
+  st_set_position(position[X_AXIS], position[Y_AXIS], position[Z_AXIS], position[E_AXIS]);
 }
 
 void plan_set_e_position(const float &e)

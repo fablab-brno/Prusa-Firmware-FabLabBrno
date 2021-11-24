@@ -4,7 +4,7 @@
 #ifndef MARLIN_H
 #define MARLIN_H
 
-#define  FORCE_INLINE __attribute__((always_inline)) inline
+#include "macros.h"
 
 #include <math.h>
 #include <stdio.h>
@@ -116,7 +116,6 @@ void serial_echopair_P(const char *s_P, unsigned long v);
 void serialprintPGM(const char *str);
 
 bool is_buffer_empty();
-void get_command();
 void process_commands();
 void ramming();
 
@@ -174,11 +173,9 @@ void manage_inactivity(bool ignore_stepper_queue=false);
     void check_force_z();
     void enable_force_z();
     void disable_force_z();
-    #define enable_z() enable_force_z()
+    #define  enable_z()  enable_force_z()
     #define disable_z() disable_force_z()
 #endif // PSU_Delta
-
-
 
 
 //#if defined(Z_ENABLE_PIN) && Z_ENABLE_PIN > -1
@@ -240,26 +237,14 @@ void get_coordinates();
 void prepare_move();
 void kill(const char *full_screen_message = NULL, unsigned char id = 0);
 void Stop();
-
 bool IsStopped();
 void finishAndDisableSteppers();
-
-//put an ASCII command at the end of the current buffer.
-void enquecommand(const char *cmd, bool from_progmem = false);
 
 //put an ASCII command at the end of the current buffer, read from flash
 #define enquecommand_P(cmd) enquecommand(cmd, true)
 
-//put an ASCII command at the begin of the current buffer
-void enquecommand_front(const char *cmd, bool from_progmem = false);
-
 //put an ASCII command at the begin of the current buffer, read from flash
 #define enquecommand_front_P(cmd) enquecommand_front(cmd, true)
-
-void repeatcommand_front();
-
-// Remove all lines from the command queue.
-void cmdqueue_reset();
 
 void prepare_arc_move(char isclockwise);
 void clamp_to_software_endstops(float target[3]);
@@ -290,11 +275,6 @@ FORCE_INLINE unsigned long millis_nc() {
 void setPwmFrequency(uint8_t pin, int val);
 #endif
 
-#ifndef CRITICAL_SECTION_START
-  #define CRITICAL_SECTION_START  unsigned char _sreg = SREG; cli();
-  #define CRITICAL_SECTION_END    SREG = _sreg;
-#endif //CRITICAL_SECTION_START
-
 extern bool fans_check_enabled;
 extern float homing_feedrate[];
 extern uint8_t axis_relative_modes;
@@ -309,6 +289,7 @@ extern float min_pos[3];
 extern float max_pos[3];
 extern bool axis_known_position[3];
 extern int fanSpeed;
+extern uint8_t newFanSpeed;
 extern int8_t lcd_change_fil_state;
 extern float default_retraction;
 
@@ -331,7 +312,6 @@ extern float retract_recover_length_swap;
 
 
 extern uint8_t host_keepalive_interval;
-
 
 extern unsigned long starttime;
 extern unsigned long stoptime;
@@ -373,10 +353,6 @@ extern unsigned long t_fan_rising_edge;
 extern bool mesh_bed_leveling_flag;
 extern bool mesh_bed_run_from_menu;
 
-extern bool sortAlpha;
-
-extern char dir_names[3][9];
-
 extern int8_t lcd_change_fil_state;
 // save/restore printing
 extern bool saved_printing;
@@ -390,9 +366,11 @@ extern bool mmu_print_saved;
 
 //estimated time to end of the print
 extern uint8_t print_percent_done_normal;
-extern uint16_t print_time_remaining_normal;
 extern uint8_t print_percent_done_silent;
+extern uint16_t print_time_remaining_normal;
 extern uint16_t print_time_remaining_silent;
+extern uint16_t print_time_to_change_normal;
+extern uint16_t print_time_to_change_silent;
 
 #define PRINT_TIME_REMAINING_INIT 0xffff
 
@@ -401,8 +379,8 @@ extern uint16_t gcode_in_progress;
 
 extern LongTimer safetyTimer;
 
-#define PRINT_PERCENT_DONE_INIT   0xff
-#define PRINTER_ACTIVE (IS_SD_PRINTING || is_usb_printing || isPrintPaused || (custom_message_type == CustomMsg::TempCal) || saved_printing || (lcd_commands_type == LcdCommands::Layer1Cal) || mmu_print_saved)
+#define PRINT_PERCENT_DONE_INIT 0xff
+#define PRINTER_ACTIVE (IS_SD_PRINTING || is_usb_printing || isPrintPaused || (custom_message_type == CustomMsg::TempCal) || saved_printing || (lcd_commands_type == LcdCommands::Layer1Cal) || mmu_print_saved || homing_flag || mesh_bed_leveling_flag)
 
 //! Beware - mcode_in_progress is set as soon as the command gets really processed,
 //! which is not the same as posting the M600 command into the command queue
@@ -464,7 +442,6 @@ extern void cancel_saved_printing();
 
 
 //estimated time to end of the print
-extern uint16_t print_time_remaining();
 extern uint8_t calc_percent_done();
 
 
@@ -504,6 +481,9 @@ void force_high_power_mode(bool start_high_power_section);
 
 bool gcode_M45(bool onlyZ, int8_t verbosity_level);
 void gcode_M114();
+#if (defined(FANCHECK) && (((defined(TACH_0) && (TACH_0 >-1)) || (defined(TACH_1) && (TACH_1 > -1)))))
+void gcode_M123();
+#endif //FANCHECK and TACH_0 and TACH_1
 void gcode_M701();
 
 #define UVLO !(PINE & (1<<4))
@@ -520,5 +500,7 @@ void marlin_wait_for_click();
 void raise_z_above(float target, bool plan=true);
 
 extern "C" void softReset();
+
+extern uint32_t IP_address;
 
 #endif

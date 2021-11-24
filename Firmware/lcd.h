@@ -18,12 +18,9 @@ extern void lcd_refresh(void);
 
 extern void lcd_refresh_noclear(void);
 
-
-
 extern void lcd_clear(void);
 
 extern void lcd_home(void);
-
 
 /*extern void lcd_no_display(void);
 extern void lcd_display(void);
@@ -43,8 +40,10 @@ extern void lcd_set_cursor(uint8_t col, uint8_t row);
 extern void lcd_createChar_P(uint8_t, const uint8_t*);
 
 
+// char c is non-standard, however it saves 1B on stack
+extern int lcd_putc(char c);
+extern int lcd_putc_at(uint8_t c, uint8_t r, char ch);
 
-extern int lcd_putc(int c);
 extern int lcd_puts_P(const char* str);
 extern int lcd_puts_at_P(uint8_t c, uint8_t r, const char* str);
 extern int lcd_printf_P(const char* format, ...);
@@ -118,22 +117,12 @@ extern lcd_lcdupdate_func_t lcd_lcdupdate_func;
 
 
 
-
-
-
 extern uint8_t lcd_clicked(void);
 
 extern void lcd_beeper_quick_feedback(void);
 
 //Cause an LCD refresh, and give the user visual or audible feedback that something has happened
 extern void lcd_quick_feedback(void);
-
-
-
-
-
-
-
 
 extern void lcd_update(uint8_t lcdDrawUpdateOverride);
 
@@ -198,8 +187,6 @@ private:
 #define encrot1 2
 #define encrot2 3
 #define encrot3 1
-
-
 
 
 //Custom characters defined in the first 8 characters of the LCD

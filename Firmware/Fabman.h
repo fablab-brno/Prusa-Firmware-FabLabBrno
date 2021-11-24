@@ -85,15 +85,15 @@ void extractDataFromJSON(uint8_t c) {
 }
 
 void getConfigFromJSON() {
-  card.ls();
+  card.ls(CardReader::ls_param());
   if (fileExist != 0) {
     SERIAL_PROTOCOLLN("File found, trying to read it");
     // Converted name of "config.json" file in root of SD card
-    card.openFile("CONFI~1.JSO", true);
+    card.openFileReadFilteredGcode("CONFI~1.JSO", true);
     // get first character
     uint8_t c = card.get();
     if (card.eof()) {
-      card.openFile("CONFIG~1.JSO", true);
+      card.openFileReadFilteredGcode("CONFIG~1.JSO", true);
       c = card.get();
       extractDataFromJSON(c);
     }

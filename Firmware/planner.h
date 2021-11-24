@@ -111,7 +111,7 @@ typedef struct {
 
   // Pre-calculated division for the calculate_trapezoid_for_block() routine to run faster.
   float speed_factor;
-    
+
 #ifdef LIN_ADVANCE
   bool use_advance_lead;            // Whether the current block uses LA
   uint16_t advance_rate,            // Step-rate for extruder speed
