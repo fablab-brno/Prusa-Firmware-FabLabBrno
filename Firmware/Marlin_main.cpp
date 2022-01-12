@@ -4216,7 +4216,53 @@ void process_commands()
         starpos = (strchr(strchr_pointer + 5, '*'));
         if (starpos != NULL)
             *(starpos) = '\0';
-        lcd_setstatus(strchr_pointer + 5);
+        /*#FLB*/
+        SERIAL_ECHO("UNM_pointer: ");
+        SERIAL_ECHOLN(strchr_pointer + 5);
+    
+        char input_data[18];
+        size_t array_size = sizeof (input_data);
+        strncpy(input_data, (strchr_pointer + 11), array_size);
+        input_data[array_size] = '\0';
+        // If the second-fourth char is dot and first char is number, save it as IP address
+        if (((input_data[1] == '.') || (input_data[2] == '.') || (input_data[3] == '.'))
+            && ((input_data[0] > 47) && (input_data[0] < 58))) {
+          FM_IP[0] = ' ';
+          for(int i=0; i<=array_size; i++) {
+            FM_IP[i+1] = input_data[i];
+          }
+          FM_IP[array_size] = '\0';
+          SERIAL_ECHO("UNM IP: ");
+          SERIAL_ECHOLN(FM_IP);
+        }else if((input_data[0] == 'v') && (input_data[1] > 47) && (input_data[1] < 58)){
+          FM_VER[0] = ' ';
+          for(int i=1; i<=array_size; i++) {
+            FM_VER[i] = input_data[i];
+          }
+          FM_VER[array_size] = '\0';
+          SERIAL_ECHO("UNM Version: ");
+          SERIAL_ECHOLN(FM_VER);
+        }
+        // If the first three chars are "FM_", save it as debug type from "FM_FW_<0/1>"
+        else if ((input_data[0] == 'F') && (input_data[1] == 'M') && (input_data[2] == '_')) {
+          // The 6th char is number 0 or 1, the ASCII value 48 or 49
+          selected_FM_FW_TYPE = input_data[6] - 48;
+          // Unlock FM_FW_TYPE
+          lock_FM_FW_TYPE = 0;
+        }
+        // If not, is is decoded as name
+        else {
+          lcd_setstatus(strchr_pointer + 5);
+          // Save input as name
+          for(int i=0; i<=array_size; i++) {
+            FM_UserName[i] = input_data[i];
+          }
+          FM_UserName[array_size] = '\0';
+          SERIAL_ECHO("UNM UserName: ");
+          SERIAL_ECHOLN(FM_UserName);
+        }
+/*#FLB*/
+       // lcd_setstatus(strchr_pointer + 5);
         custom_message_type = CustomMsg::MsgUpdate;
     }
 
@@ -4235,58 +4281,6 @@ void process_commands()
     - TMC_SET_STEP
     - TMC_SET_CHOP
  */
-  if (code_seen("M117")) { //moved to highest priority place to be able to to print strings which includes "G", "PRUSA" and "^"
-	  starpos = (strchr(strchr_pointer + 5, '*'));
-	  if (starpos != NULL)
-		  *(starpos) = '\0';
-/*#FLB*/
-    SERIAL_ECHO("UNM_pointer: ");
-    SERIAL_ECHOLN(strchr_pointer + 5);
-
-    char input_data[18];
-    size_t array_size = sizeof (input_data);
-    strncpy(input_data, (strchr_pointer + 11), array_size);
-    input_data[array_size] = '\0';
-    // If the second-fourth char is dot and first char is number, save it as IP address
-    if (((input_data[1] == '.') || (input_data[2] == '.') || (input_data[3] == '.'))
-        && ((input_data[0] > 47) && (input_data[0] < 58))) {
-      FM_IP[0] = ' ';
-      for(int i=0; i<=array_size; i++) {
-        FM_IP[i+1] = input_data[i];
-      }
-      FM_IP[array_size] = '\0';
-      SERIAL_ECHO("UNM IP: ");
-      SERIAL_ECHOLN(FM_IP);
-    }else if((input_data[0] == 'v') && (input_data[1] > 47) && (input_data[1] < 58)){
-      FM_VER[0] = ' ';
-      for(int i=1; i<=array_size; i++) {
-        FM_VER[i] = input_data[i];
-      }
-      FM_VER[array_size] = '\0';
-      SERIAL_ECHO("UNM Version: ");
-      SERIAL_ECHOLN(FM_VER);
-    }
-    // If the first three chars are "FM_", save it as debug type from "FM_FW_<0/1>"
-    else if ((input_data[0] == 'F') && (input_data[1] == 'M') && (input_data[2] == '_')) {
-      // The 6th char is number 0 or 1, the ASCII value 48 or 49
-      selected_FM_FW_TYPE = input_data[6] - 48;
-      // Unlock FM_FW_TYPE
-      lock_FM_FW_TYPE = 0;
-    }
-    // If not, is is decoded as name
-    else {
-      lcd_setstatus(strchr_pointer + 5);
-      // Save input as name
-      for(int i=0; i<=array_size; i++) {
-        FM_UserName[i] = input_data[i];
-      }
-      FM_UserName[array_size] = '\0';
-      SERIAL_ECHO("UNM UserName: ");
-      SERIAL_ECHOLN(FM_UserName);
-    }
-/*#FLB*/
-// lcd_setstatus(strchr_pointer + 5);
-  }
 
     /*!
     ### M0, M1 - Stop the printer <a href="https://reprap.org/wiki/G-code#M0:_Stop_or_Unconditional_stop">M0: Stop or Unconditional stop</a>
