@@ -2,6 +2,8 @@
 #include "cmdqueue.h"
 #include "cardreader.h"
 #include "ultralcd.h"
+#include "conv2str.h"
+#include "menu.h"
 #include "stepper.h"
 #include "temperature.h"
 #include "language.h"
@@ -216,7 +218,7 @@ void CardReader::ls(ls_param params)
 }
 
 
-void CardReader::initsd()
+void CardReader::initsd(bool doPresort/* = true*/)
 {
   cardOK = false;
   if(root.isOpen())
@@ -260,7 +262,8 @@ void CardReader::initsd()
   workDirDepth = 0;
 
   #ifdef SDCARD_SORT_ALPHA
-	presort();
+  if (doPresort)
+    presort();
   #endif
 
   /*
@@ -618,20 +621,9 @@ void CardReader::getStatus(bool arg_P)
 }
 void CardReader::write_command(char *buf)
 {
-  char* begin = buf;
-  char* npos = 0;
-  char* end = buf + strlen(buf) - 1;
-
   file.writeError = false;
-  if((npos = strchr(buf, 'N')) != NULL)
-  {
-    begin = strchr(npos, ' ') + 1;
-    end = strchr(npos, '*') - 1;
-  }
-  end[1] = '\r';
-  end[2] = '\n';
-  end[3] = '\0';
-  file.write(begin);
+  file.write(buf); //write command
+  file.write("\r\n"); //write line termination
   if (file.writeError)
   {
     SERIAL_ERROR_START;
@@ -1063,7 +1055,6 @@ void CardReader::presort() {
 
 	lcd_update(2);
 	KEEPALIVE_STATE(NOT_BUSY);
-	lcd_timeoutToStatus.start();
 }
 
 void CardReader::flush_presort() {
