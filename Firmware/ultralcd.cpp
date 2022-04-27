@@ -4397,7 +4397,8 @@ void lcd_FM_offline_screen() {
   for (int i = 0; i < 50; i++) { //wait max. 5s
     delay_keep_alive(100);
   }
-  lcd_puts_P(PSTR(ESC_2J ESC_H(2, 1) "Prusa i3 Fabman" ESC_H(3, 2) "Swipe to login"));
+  lcd_puts_at_P(2, 1, _i("Prusa i3 Fabman"));
+  lcd_puts_at_P(3, 2, _i("Swipe to login"));
 }
 
 void lcd_FM_not_allowed_screen() {
@@ -4408,7 +4409,8 @@ void lcd_FM_not_allowed_screen() {
   for (int i = 0; i < 50; i++) { //wait max. 5s
     delay_keep_alive(100);
   }
-  lcd_puts_P(PSTR(ESC_2J ESC_H(2, 1) "Prusa i3 Fabman" ESC_H(3, 2) "Swipe to login"));
+  lcd_puts_at_P(2, 1, _i("Prusa i3 Fabman"));
+  lcd_puts_at_P(3, 2, _i("Swipe to login"));
 }
 void lcd_FM_required_training_screen() {
   SERIAL_PROTOCOLLN("Stage 3 = reached lcd_FM_required_training_screen()");
@@ -4418,7 +4420,9 @@ void lcd_FM_required_training_screen() {
   for (int i = 0; i < 50; i++) { //wait max. 5s
     delay_keep_alive(100);
   }
-  lcd_puts_P(PSTR(ESC_2J ESC_H(2, 1) "Prusa i3 Fabman" ESC_H(3, 2) "Swipe to login"));
+  lcd_clear();
+  lcd_puts_at_P(2, 1, _i("Prusa i3 Fabman"));
+  lcd_puts_at_P(3, 2, _i("Swipe to login"));
 }
 
 void lcd_FM_required_package_screen() {
@@ -4429,7 +4433,9 @@ void lcd_FM_required_package_screen() {
   for (int i = 0; i < 50; i++) { //wait max. 5s
     delay_keep_alive(100);
   }
-  lcd_puts_P(PSTR(ESC_2J ESC_H(2, 1) "Prusa i3 Fabman" ESC_H(3, 2) "Swipe to login"));
+  lcd_clear();
+  lcd_puts_at_P(2, 1, _i("Prusa i3 Fabman"));
+  lcd_puts_at_P(3, 2, _i("Swipe to login"));
 }
 
 void lcd_FM_not_online_screen() {
@@ -4440,7 +4446,8 @@ void lcd_FM_not_online_screen() {
   for (int i = 0; i < 50; i++) { //wait max. 5s
     delay_keep_alive(100);
   }
-  lcd_puts_P(PSTR(ESC_2J ESC_H(2, 1) "Prusa i3 Fabman" ESC_H(3, 2) "Swipe to login"));
+  lcd_puts_at_P(2, 1, _i("Prusa i3 Fabman"));
+  lcd_puts_at_P(3, 2, _i("Swipe to login"));
 }
 
 void lcd_FM_FM_update_screen() {
