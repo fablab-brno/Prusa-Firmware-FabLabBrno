@@ -9986,7 +9986,11 @@ static void handleSafetyTimer()
     {
         setTargetBed(0);
         setAllTargetHotends(0);
-        lcd_show_fullscreen_message_and_wait_P(_i("Heating disabled by safety timer."));////MSG_BED_HEATING_SAFETY_DISABLED c=20 r=4
+/*#FLB*/
+        //lcd_show_fullscreen_message_and_wait_P(_i("Heating disabled by safety timer."));////MSG_BED_HEATING_SAFETY_DISABLED c=20 r=4
+        // Changed to non-blocking print to not allow corner case, where printer would stay unlocked
+        lcd_display_message_fullscreen_P(_i("Heating disabled by safety timer."));
+/*#FLB*/
     }
 }
 #endif //SAFETYTIMER
